@@ -21,7 +21,7 @@ endif
 
 .PHONY: all clean 
 
-all: $(LIBSLIDE)
+all: clean $(LIBSLIDE) app
 
 build/obj/%.o: src/%.c $(DEPS)
 	@mkdir -p $(dir $@)
@@ -30,6 +30,9 @@ build/obj/%.o: src/%.c $(DEPS)
 $(LIBSLIDE): $(OBJS)
 	@mkdir -p $(dir @a)
 	ar rcs $(LIBSLIDE) $<
+
+app:
+	$(CC) $(CFLAGS) apps/main.c $(LIBSLIDE) -o bin/a.out
 
 clean:
 	rm -rf build bin
