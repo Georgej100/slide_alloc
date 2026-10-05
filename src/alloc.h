@@ -1,19 +1,12 @@
+#pragma once
 #include <stdint.h>
 
-#define EXT_SIZE_TOO_LOW 1
-#define EXT_MMAP_FAILURE 2
-
-struct heap_chunk_t
+typedef struct 
 {
-    struct heap_chunk_t* next;
-    uint64_t size;
-    char inuse;
-};
+    void* head;
+    uint32_t size;
+} heap_t;
 
-struct heap_t
-{
-    struct heap_chunk_t* first;
-};
+heap_t heap_init(void* memory, uint32_t size);
 
-
-struct heap_t heap_init(uint64_t size);
+void* heap_alloc(heap_t* heap, uint32_t size);
