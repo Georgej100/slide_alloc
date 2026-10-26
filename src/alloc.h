@@ -1,25 +1,34 @@
 #pragma once
 #include <stdint.h>
+#include <stddef.h>
 
+#define HEAP_INIT_SUCCESS 0
+#define HEAP_INIT_INVALID_MEMORY 1
+#define HEAP_INIT_LOW_MEMORY 2
 
-#define MAX_TABLE_ENTRIES 10
+#define CHUNK_INUSE 0b0000000000000001
+#define CHUNK_FREE  0b0000000000000000
 
-typedef struct {
-    void* raw;
-    uint32_t size;
-    char inuse;
-} table_entry_t;
-
-typedef int entry_id_t;
-
-void* dereference(entry_id_t id);
+typedef struct
+{
+    size_t size;
+    uint16_t flags;
+} heap_chunk_t;
 
 typedef struct 
 {
-    void* head;
-    uint32_t size;
+    void* memory;   // Memory array given by OS/Hardware
+    heap_chunk_t* head;     // Head of bump allocator
+    size_t size;    // Size of total memory
 } heap_t;
 
-heap_t heap_init(void* memory, uint32_t size);
 
-entry_id_t heap_alloc(heap_t* heap, uint32_t size);
+/*
+ * Initialises the user given heap pointer
+ *  Memory must be valid 
+ *  Size must be greater than sizeof(heap_chunk_t) + 1
+ *
+ *  Returns 0 on success or error code beginning in HEAP_INIT
+ *
+ * */
+int initialize_heap(heap_t* heap, void* memory, size_t size);

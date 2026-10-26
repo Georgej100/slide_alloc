@@ -1,53 +1,21 @@
 #include <stdint.h>
-#include <assert.h>
+#include <stddef.h>
 #include "alloc.h"
 
-table_entry_t master_table[MAX_TABLE_ENTRIES];
+#define ASSERT_RET(condition, ret_code) if(!(condition)) { return ret_code; }
 
-void* dereference(entry_id_t id)
+int initialize_heap(heap_t* heap, void* memory, size_t size)
 {
-    return master_table[id].raw;
+    ASSERT_RET(memory != NULL, HEAP_INIT_INVALID_MEMORY);
+    ASSERT_RET(size > sizeof(heap_chunk_t) + 1, HEAP_INIT_LOW_MEMORY);
+
+    heap_chunk_t* first = (heap_chunk_t*)memory;
+    first->size = (size - sizeof(heap_chunk_t));
+    first->flags &= CHUNK_FREE;
+
+    heap->head = first;
+    heap->memory = memory;
+    heap->size = size;
+
+    return HEAP_INIT_SUCCESS;
 }
-
-heap_t heap_init(void* memory, uint32_t size)
-{
-    heap_t heap;
-
-    assert(memory);
-
-    heap.head = memory;
-    heap.size = size;
-
-    return heap;
-}
-
-
-entry_id_t heap_alloc(heap_t* heap, uint32_t size)
-{
-    assert(size < heap->size);
-
-    heap->head += size;
-    heap->size -= size;
-
-    void* raw = heap->head - size;
-    
-
-    for (int x = 0; x < MAX_TABLE_ENTRIES; x++) {
-        if (master_table[x].inuse == 0)
-        {
-            table_entry_t* entry = &master_table[x];
-            
-            entry->inuse = 1;
-            entry->size = size;
-            entry->raw = raw;
-
-            return (entry_id_t)x;
-        }
-    }
-
-    return (entry_id_t)-1;
-
-}
-
-
-

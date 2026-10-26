@@ -1,5 +1,5 @@
 CC:=gcc
-IDIR:=./include/
+IDIR:=./include/ 
 CFLAGS:=-Wall -Wextra -Werror -I$(IDIR)
 
 SRCS:= $(wildcard src/*.c)
@@ -32,7 +32,7 @@ $(LIBSLIDE): $(OBJS)
 	ar rcs $(LIBSLIDE) $<
 
 app:
-	$(CC) $(CFLAGS) apps/main.c $(LIBSLIDE) -o bin/a.out
+	$(CC) $(CFLAGS) apps/unit_tests.c apps/main.c $(LIBSLIDE) -o bin/a.out
 
 clean:
 	rm -rf build bin
