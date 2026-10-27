@@ -29,7 +29,7 @@ build/obj/%.o: src/%.c $(DEPS)
 
 $(LIBSLIDE): $(OBJS)
 	@mkdir -p $(dir @a)
-	ar rcs $(LIBSLIDE) $<
+	ar rcs $(LIBSLIDE) $(OBJS)
 
 app:
 	$(CC) $(CFLAGS) apps/unit_tests.c apps/main.c $(LIBSLIDE) -o bin/a.out
