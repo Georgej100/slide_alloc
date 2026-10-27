@@ -11,9 +11,9 @@ void test_heap_init()
     heap_t heap;
 
     TEST(initialize_heap (&heap, NULL, 4096), HEAP_INIT_INVALID_MEMORY, "Heap Invalid Memory");
-
-
     TEST(initialize_heap(&heap, memory, 0), HEAP_INIT_LOW_MEMORY, "Heap Low Memory");
+    TEST(initialize_heap(NULL, memory, 4096), HEAP_INIT_INVALID_HEAP, "Heap Invalid Heap");
+
 
     free(memory);
 
