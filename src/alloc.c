@@ -1,8 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "alloc.h"
-
-#define ASSERT_RET(condition, ret_code) if(!(condition)) { return ret_code; }
+#include "assert.h"
 
 int initialize_heap(heap_t* heap, void* memory, size_t size)
 {
