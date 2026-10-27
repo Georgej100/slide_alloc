@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include "alloc.h"
 #include "assert.h"
+#include "masks.h"
 
 int initialize_heap(heap_t* heap, void* memory, size_t size)
 {
@@ -11,7 +12,7 @@ int initialize_heap(heap_t* heap, void* memory, size_t size)
 
     heap_chunk_t* first = (heap_chunk_t*)memory;
     first->size = (size - sizeof(heap_chunk_t));
-    first->flags &= CHUNK_FREE;
+    SET_FLAG(first->flags, CHUNK_USE_MASK);
 
     heap->head = first;
     heap->memory = memory;
@@ -19,3 +20,5 @@ int initialize_heap(heap_t* heap, void* memory, size_t size)
 
     return HEAP_INIT_SUCCESS;
 }
+
+

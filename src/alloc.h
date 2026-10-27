@@ -7,8 +7,7 @@
 #define HEAP_INIT_LOW_MEMORY 2
 #define HEAP_INIT_INVALID_HEAP 3
 
-#define CHUNK_INUSE 0b0000000000000001
-#define CHUNK_FREE  0b0000000000000000
+#define CHUNK_USE_MASK (1 << 0)
 
 typedef struct
 {
