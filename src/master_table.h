@@ -30,3 +30,7 @@ typedef struct
 
 
 int initialize_master_table(master_table_t* master_table);
+
+int get_next_id(master_table_t* master_table, table_id_t* id);
+
+int return_id(master_table_t* master_table, table_id_t id);

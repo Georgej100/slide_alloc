@@ -21,8 +21,9 @@ void test_heap_init()
 
     initialize_master_table(&table);
 
-    TEST(entries[1].next, &entries[2], "Table linking");
-
+    TEST(entries[0].next, &entries[1], "Table linking");
+    TEST(entries[19].next, NULL, "Table End"); 
+    
     free(memory);
 
 }
