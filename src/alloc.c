@@ -3,6 +3,7 @@
 #include "alloc.h"
 #include "assert.h"
 #include "masks.h"
+#include "master_table.h"
 
 int initialize_heap(heap_t* heap, void* memory, size_t size)
 {
@@ -14,6 +15,7 @@ int initialize_heap(heap_t* heap, void* memory, size_t size)
     first->size = (size - sizeof(heap_chunk_t));
     SET_FLAG(first->flags, CHUNK_USE_MASK);
 
+
     heap->head = first;
     heap->memory = memory;
     heap->size = size;
@@ -21,4 +23,27 @@ int initialize_heap(heap_t* heap, void* memory, size_t size)
     return HEAP_INIT_SUCCESS;
 }
 
+table_id_t alloc(heap_t* heap, size_t size)
+{
+    ASSERT_RET(heap != NULL, HEAP_ALLOC_INVALID_HEAP);
+    ASSERT_RET(size > 0, HEAP_ALLOC_TOO_SMALL);
 
+    table_id_t id;
+    ASSERT_RET(get_next_id(heap->master_table, &id) == MASTER_GET_SUCCESS, 
+        HEAP_ALLOC_NO_IDS);
+
+    table_entry_t* entry = &heap->master_table->entries[id];
+    
+    size_t prev_size = heap->head->size;
+
+    heap->head->size = size;
+    SET_FLAG(heap->head->flags, CHUNK_USE_MASK);
+
+    entry->raw = heap->head;
+
+    heap->head = heap->head + sizeof(heap_chunk_t) + size;
+    heap->head->size = prev_size - sizeof(heap_chunk_t);
+    CLEAR_FLAG(heap->head->flags, CHUNK_USE_MASK);
+
+    return id;
+}

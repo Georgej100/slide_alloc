@@ -1,11 +1,16 @@
 #pragma once
 #include <stdint.h>
 #include <stddef.h>
+#include "master_table.h"
 
 #define HEAP_INIT_SUCCESS 0
 #define HEAP_INIT_INVALID_MEMORY 1
 #define HEAP_INIT_LOW_MEMORY 2
 #define HEAP_INIT_INVALID_HEAP 3
+
+#define HEAP_ALLOC_INVALID_HEAP 1
+#define HEAP_ALLOC_TOO_SMALL 2
+#define HEAP_ALLOC_NO_IDS 3
 
 #define CHUNK_USE_MASK (1 << 0)
 
@@ -18,6 +23,7 @@ typedef struct
 typedef struct 
 {
     void* memory;   // Memory array given by OS/Hardware
+    master_table_t* master_table;
     heap_chunk_t* head;     // Head of bump allocator
     size_t size;    // Size of total memory
 } heap_t;
