@@ -23,6 +23,16 @@ void test_heap_init()
 
     TEST(entries[0].next, &entries[1], "Table linking");
     TEST(entries[19].next, NULL, "Table End"); 
+
+
+    initialize_heap(&heap, memory, 4096);
+    heap.master_table = &table;
+
+    table_id_t b1 = alloc(&heap, 5);
+    strcpy(table.entries[b1].raw, "AAAAB");
+
+    table_id_t b2 = alloc(&heap, 5);
+    strcpy(table.entries[b2].raw, "CCCCD");
     
     free(memory);
 

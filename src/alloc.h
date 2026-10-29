@@ -18,7 +18,7 @@ typedef struct
 {
     size_t size;
     uint16_t flags;
-} heap_chunk_t;
+}__attribute__((__packed__)) heap_chunk_t;
 
 typedef struct 
 {

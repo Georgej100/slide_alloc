@@ -39,10 +39,10 @@ table_id_t alloc(heap_t* heap, size_t size)
     heap->head->size = size;
     SET_FLAG(heap->head->flags, CHUNK_USE_MASK);
 
-    entry->raw = heap->head;
+    entry->raw = (void*)heap->head + sizeof(heap_chunk_t);
 
-    heap->head = heap->head + sizeof(heap_chunk_t) + size;
-    heap->head->size = prev_size - sizeof(heap_chunk_t);
+    heap->head = (void*)heap->head + sizeof(heap_chunk_t) + size;
+    heap->head->size = prev_size - sizeof(heap_chunk_t) - size;
     CLEAR_FLAG(heap->head->flags, CHUNK_USE_MASK);
 
     return id;

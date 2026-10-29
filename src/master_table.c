@@ -16,11 +16,12 @@ int initialize_master_table(master_table_t* master_table)
         if (id == master_table->amount_entries - 1)
         {
             master_table->entries[id].next = NULL;
-            CLEAR_FLAG(master_table->entries[id].flags, ENTRY_USE_MASK);             
+            CLEAR_FLAG(master_table->entries[id].flags, ENTRY_USE_MASK);        
+            master_table->head = &master_table->entries[0];     
             return MASTER_INIT_SUCCESS;
         }
         
-        SET_FLAG(master_table->entries[id].flags, ENTRY_USE_MASK);         
+        CLEAR_FLAG(master_table->entries[id].flags, ENTRY_USE_MASK);         
         master_table->entries[id].next = &master_table->entries[id + 1];
 
     }
@@ -36,7 +37,7 @@ int get_next_id(master_table_t* master_table, table_id_t* id)
 {
     // Get first entry in linked list and check if NULL
     table_entry_t* next = master_table->head;
-    ASSERT_RET(next != NULL, MASTER_GET_NONE_LEFT);
+    ASSERT_RET(next != NULL, -1);
 
     // Assigns head to next in line
     master_table->head = next->next;
