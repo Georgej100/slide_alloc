@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "alloc.h"
 
 #define MASTER_INIT_SUCCESS 0
 #define MASTER_INIT_NO_TABLE 1
@@ -15,7 +16,7 @@ typedef struct table_entry_t table_entry_t;
 struct table_entry_t 
 {
     void* raw;
-    table_entry_t* next;
+    heap_chunk_t* next;
     uint16_t flags;
 };
 
