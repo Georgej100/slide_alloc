@@ -4,7 +4,7 @@
 #include "../src/alloc.h"
 #include "../src/master_table.h"
 #include "unit_tests.h"
-
+#include "../src/debug.h"
 
 void test_heap_init()
 {
@@ -35,6 +35,8 @@ void test_heap_init()
     table_id_t b2 = alloc(&heap, 5);
     strcpy(table.entries[b2].raw, "CCCCD");
     
+    print_heap(&heap);
+
     free(memory);
 
 }
