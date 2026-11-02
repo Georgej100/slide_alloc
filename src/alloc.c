@@ -38,6 +38,7 @@ table_id_t salloc(heap_t* heap, size_t size)
 
     heap->head->size = size;
     SET_FLAG(heap->head->flags, CHUNK_USE_MASK);
+    heap->head->id = id;
 
     entry->raw = (void*)heap->head + sizeof(heap_chunk_t);
 

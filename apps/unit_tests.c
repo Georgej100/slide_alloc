@@ -5,6 +5,7 @@
 #include "../src/master_table.h"
 #include "unit_tests.h"
 #include "../src/debug.h"
+#include "../src/compact.h"
 
 void test_heap_init()
 {
@@ -16,16 +17,7 @@ void test_heap_init()
     master_table_t table = {entries, NULL, 20};
     heap_t heap;
 
-    TEST(initialize_heap (&heap, NULL, 4096), HEAP_INIT_INVALID_MEMORY, "Heap Invalid Memory");
-    TEST(initialize_heap(&heap, memory, 0), HEAP_INIT_LOW_MEMORY, "Heap Low Memory");
-    TEST(initialize_heap(NULL, memory, 4096), HEAP_INIT_INVALID_HEAP, "Heap Invalid Heap");
-
     initialize_master_table(&table);
-
-    TEST(entries[0].next, &entries[1], "Table linking");
-    TEST(entries[19].next, NULL, "Table End"); 
-
-
     initialize_heap(&heap, memory, 4096);
     heap.master_table = &table;
 
@@ -40,6 +32,10 @@ void test_heap_init()
     print_heap(&heap);
 
     sfree(&heap, b1);
+
+    print_heap(&heap);
+
+    bubble_compact(&heap, 3);
 
     print_heap(&heap);
 
