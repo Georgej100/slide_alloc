@@ -47,12 +47,3 @@ table_id_t alloc(heap_t* heap, size_t size)
 
     return id;
 }
-
-int free(heap_t* heap, table_id_t id)
-{
-    ASSERT_RET(IS_FLAG(heap->master_table->entries[id].flags, ENTRY_USE_MASK), -1);
-    heap_chunk_t* entry = heap->master_table->entries[id].raw;
-    CLEAR_FLAG(entry->flags, CHUNK_USE_MASK);
-
-    ASSERT_RET((heap->master_table, id) != MASTER_RETURN_UNUSED, -1);
-}

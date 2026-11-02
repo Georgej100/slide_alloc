@@ -5,6 +5,7 @@
 #include "../src/master_table.h"
 #include "unit_tests.h"
 
+
 void test_heap_init()
 {
     void* memory = malloc(4096);

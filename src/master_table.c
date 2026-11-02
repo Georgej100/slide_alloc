@@ -61,7 +61,6 @@ int return_id(master_table_t* master_table, table_id_t id)
     
     // Re-add to linked list
     entry->next = master_table->head;
-    entry->raw = NULL;
     master_table->head = entry;
     CLEAR_FLAG(entry->flags, ENTRY_USE_MASK);
 
