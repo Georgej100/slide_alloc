@@ -29,12 +29,18 @@ void test_heap_init()
     initialize_heap(&heap, memory, 4096);
     heap.master_table = &table;
 
-    table_id_t b1 = alloc(&heap, 5);
+    print_heap(&heap);
+
+    table_id_t b1 = salloc(&heap, 5);
     strcpy(table.entries[b1].raw, "AAAAB");
 
-    table_id_t b2 = alloc(&heap, 5);
+    table_id_t b2 = salloc(&heap, 5);
     strcpy(table.entries[b2].raw, "CCCCD");
     
+    print_heap(&heap);
+
+    sfree(&heap, b1);
+
     print_heap(&heap);
 
     free(memory);

@@ -13,7 +13,7 @@ int initialize_heap(heap_t* heap, void* memory, size_t size)
 
     heap_chunk_t* first = (heap_chunk_t*)memory;
     first->size = (size - sizeof(heap_chunk_t));
-    SET_FLAG(first->flags, CHUNK_USE_MASK);
+    CLEAR_FLAG(first->flags, CHUNK_USE_MASK);
 
 
     heap->head = first;
@@ -23,7 +23,7 @@ int initialize_heap(heap_t* heap, void* memory, size_t size)
     return HEAP_INIT_SUCCESS;
 }
 
-table_id_t alloc(heap_t* heap, size_t size)
+table_id_t salloc(heap_t* heap, size_t size)
 {
     ASSERT_RET(heap != NULL, HEAP_ALLOC_INVALID_HEAP);
     ASSERT_RET(size > 0, HEAP_ALLOC_TOO_SMALL);
@@ -46,4 +46,16 @@ table_id_t alloc(heap_t* heap, size_t size)
     CLEAR_FLAG(heap->head->flags, CHUNK_USE_MASK);
 
     return id;
+}
+
+
+int sfree(heap_t* heap, table_id_t id)
+{
+    ASSERT_RET(IS_FLAG(heap->master_table->entries[id].flags, ENTRY_USE_MASK), -1);
+    heap_chunk_t* entry = (void*)heap->master_table->entries[id].raw - sizeof(heap_chunk_t);
+    CLEAR_FLAG(entry->flags, CHUNK_USE_MASK);
+
+    ASSERT_RET(return_id(heap->master_table, id) != MASTER_RETURN_UNUSED, -1);
+
+    return 0;
 }

@@ -39,4 +39,6 @@ typedef struct
  * */
 int initialize_heap(heap_t* heap, void* memory, size_t size);
 
-table_id_t alloc(heap_t* heap, size_t size);
+table_id_t salloc(heap_t* heap, size_t size);
+
+int sfree(heap_t* heap, table_id_t id);
