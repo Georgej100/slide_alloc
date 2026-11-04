@@ -32,7 +32,7 @@ $(LIBSLIDE): $(OBJS)
 	ar rcs $(LIBSLIDE) $(OBJS)
 
 app:
-	$(CC) $(CFLAGS) apps/unit_tests.c apps/main.c $(LIBSLIDE) -o bin/a.out
+	$(CC) $(CFLAGS) apps/main.c $(LIBSLIDE) -o bin/a.out
 
 clean:
 	rm -rf build bin
