@@ -29,7 +29,7 @@ typedef struct
 } master_table_t;
 
 
-int initialize_master_table(master_table_t* master_table);
+int master_table_init(master_table_t* master_table);
 
 int get_next_id(master_table_t* master_table, table_id_t* id);
 

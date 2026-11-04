@@ -38,7 +38,7 @@ typedef struct
  *  Returns 0 on success or error code beginning in HEAP_INIT
  *
  * */
-int initialize_heap(heap_t* heap, void* memory, size_t size);
+int heap_init(heap_t* heap, void* memory, size_t size);
 
 table_id_t salloc(heap_t* heap, size_t size);
 

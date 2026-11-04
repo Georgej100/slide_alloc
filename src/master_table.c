@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-int initialize_master_table(master_table_t* master_table)
+int master_table_init(master_table_t* master_table)
 {
     ASSERT_RET(master_table != NULL, MASTER_INIT_NO_TABLE);
 

@@ -17,8 +17,8 @@ void test_heap_init()
     master_table_t table = {entries, NULL, 20};
     heap_t heap;
 
-    initialize_master_table(&table);
-    initialize_heap(&heap, memory, 4096);
+    master_table_init(&table);
+    heap_init(&heap, memory, 4096);
     heap.master_table = &table;
 
     print_heap(&heap);
