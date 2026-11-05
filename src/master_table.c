@@ -33,8 +33,6 @@ int master_table_init(master_table_t* master_table)
 #define ENTRY_ID_FROM_ADDR(base, addr) (addr - base)   // Derives the ID using pointer arithmetic
 
 
-
-
 int get_next_id(master_table_t* master_table, table_id_t* id)
 {
     // Get first entry in linked list and check if NULL

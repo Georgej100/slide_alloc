@@ -1,6 +1,5 @@
 #pragma once
 #include <stdint.h>
-#include <stdatomic.h>
 
 #define MASTER_INIT_SUCCESS 0
 #define MASTER_INIT_NO_TABLE 1
@@ -25,7 +24,7 @@ typedef uint32_t table_id_t;
 typedef struct 
 {
     table_entry_t* entries;
-    _Atomic table_entry_t* head;
+    table_entry_t* head;
     uint32_t amount_entries;
 } master_table_t;
 
