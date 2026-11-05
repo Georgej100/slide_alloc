@@ -3,10 +3,13 @@
 #include "alloc.h"
 #include "masks.h"
 
-void print_heap(heap_t* heap)
-{
+
+
+void print_heap( __attribute__ ((unused)) heap_t* heap)
+{    
+#ifdef DEBUG
     heap_chunk_t* pointer = heap->memory;
-    
+
     while(1)
     {
         if(pointer == heap->head)
@@ -21,4 +24,7 @@ void print_heap(heap_t* heap)
         printf("Next Chunk @ %p\n", (void*)pointer);
 
     }
+
+#endif
 }
+
