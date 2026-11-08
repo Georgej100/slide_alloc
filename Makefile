@@ -1,6 +1,6 @@
 CC:=gcc
-IDIR:=./include/ 
-CFLAGS:=-Wall -Wextra -Werror -I$(IDIR)
+IDIR:=-I./include/ -I./src/
+CFLAGS:=-Wall -Wextra -Werror $(IDIR)
 
 SRCS:= $(wildcard src/*.c)
 OBJS:= $(SRCS:src/%.c=build/obj/%.o)

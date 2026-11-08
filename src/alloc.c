@@ -28,22 +28,26 @@ table_id_t salloc(heap_t* heap, size_t size)
     ASSERT_RET(heap != NULL, HEAP_ALLOC_INVALID_HEAP);
     ASSERT_RET(size > 0, HEAP_ALLOC_TOO_SMALL);
 
+    size_t prev_size = heap->head->size;
+
+    // Get ID
     table_id_t id;
     ASSERT_RET(get_next_id(heap->master_table, &id) == MASTER_GET_SUCCESS, 
         HEAP_ALLOC_NO_IDS);
-
     table_entry_t* entry = &heap->master_table->entries[id];
-    
-    size_t prev_size = heap->head->size;
 
-    heap->head->size = size;
-    SET_FLAG(heap->head->flags, CHUNK_USE_MASK);
-    heap->head->id = id;
+    // Setup new chunk
+    heap_chunk_t* chunk = heap->head;
+    SET_FLAG(chunk->flags, CHUNK_USE_MASK);
+    chunk->size = size;
+    chunk->id = id;
 
     entry->raw = (void*)heap->head + sizeof(heap_chunk_t);
 
+    // Setup next chunk
     heap->head = (void*)heap->head + sizeof(heap_chunk_t) + size;
     heap->head->size = prev_size - sizeof(heap_chunk_t) - size;
+    heap->head->id = -1;
     CLEAR_FLAG(heap->head->flags, CHUNK_USE_MASK);
 
     return id;

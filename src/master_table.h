@@ -14,8 +14,11 @@
 typedef struct table_entry_t table_entry_t;
 struct table_entry_t 
 {
-    void* raw;
-    table_entry_t* next;
+    union 
+    {
+        void* raw;
+        table_entry_t* next;
+    };
     uint16_t flags;
 };
 
