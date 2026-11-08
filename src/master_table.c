@@ -4,7 +4,7 @@
 #include "master_table.h"
 #include "masks.h"
 #include "assert.h"
-
+#include "tagging.h"
 
 #include <stdio.h>
 
@@ -40,17 +40,18 @@ int master_table_init(master_table_t* master_table, void* entries, unsigned int 
 int get_next_id(master_table_t* master_table, table_id_t* id)
 {
     // Get first entry in linked list and check if NULL
-    table_entry_t* next = master_table->head;
-    ASSERT_RET(next != NULL, -1);
+    table_entry_t* new = UNTAG_PTR(master_table->head);
+    ASSERT_RET(new != NULL, -1);
 
     // Assigns head to next in line
-    master_table->head = next->next;
-    next->next = NULL;
+    master_table->head = new->next;
+    new->next = NULL;
+    master_table->head = PACK_FLAGS(master_table->head, EXTRACT_FLAGS(master_table->head) + 1);
 
-    *id = ENTRY_ID_FROM_ADDR(master_table->entries, next);
+    *id = ENTRY_ID_FROM_ADDR(master_table->entries, new);
 
     // Marks entry as inuse
-    SET_FLAG(next->flags, ENTRY_USE_MASK);
+    SET_FLAG(new->flags, ENTRY_USE_MASK);
 
     return MASTER_GET_SUCCESS;
 }
@@ -67,6 +68,7 @@ int return_id(master_table_t* master_table, table_id_t id)
     entry->next = master_table->head;
     master_table->head = entry;
     CLEAR_FLAG(entry->flags, ENTRY_USE_MASK);
+    master_table->head = PACK_FLAGS(master_table->head, EXTRACT_FLAGS(master_table->head) + 1);
 
     return 0;
 }
