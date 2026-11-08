@@ -15,12 +15,12 @@ int main(void)
     memset(memory, 0, 4096);
     memset(entries, 0, 20);
 
-    master_table_t table = {entries, NULL, 20};
+    master_table_t table;
     heap_t heap;
 
     
 
-    master_table_init(&table);
+    master_table_init(&table, entries, 20);
     heap_init(&heap, memory, 4096);
     heap.master_table = &table;
 

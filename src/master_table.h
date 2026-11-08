@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "pointer_tags.h"
 
 #define MASTER_INIT_SUCCESS 0
 #define MASTER_INIT_NO_TABLE 1
@@ -27,12 +28,12 @@ typedef uint32_t table_id_t;
 typedef struct 
 {
     table_entry_t* entries;
-    table_entry_t* head;
+    TAGGED_PTR(table_entry_t*, head);
     uint32_t amount_entries;
 } master_table_t;
 
 
-int master_table_init(master_table_t* master_table);
+int master_table_init(master_table_t* master_table, void* entries, unsigned int num);
 
 int get_next_id(master_table_t* master_table, table_id_t* id);
 
