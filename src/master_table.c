@@ -4,7 +4,7 @@
 #include "master_table.h"
 #include "masks.h"
 #include "assert.h"
-#include "pointer_tags.h"
+
 
 #include <stdio.h>
 
@@ -21,7 +21,7 @@ int master_table_init(master_table_t* master_table, void* entries, unsigned int 
         {
             master_table->entries[id].next = NULL;
             CLEAR_FLAG(master_table->entries[id].flags, ENTRY_USE_MASK);         
-            WRITE_ADDR(master_table, &master_table->entries[0]);
+            master_table->head = &master_table->entries[0];
             return MASTER_INIT_SUCCESS;
         }
         
@@ -30,7 +30,7 @@ int master_table_init(master_table_t* master_table, void* entries, unsigned int 
 
     }
     
-    WRITE_ADDR(master_table, &master_table->entries[0]);
+    master_table->head = &master_table->entries[0];
     return MASTER_INIT_SUCCESS;
 }
 
@@ -40,11 +40,11 @@ int master_table_init(master_table_t* master_table, void* entries, unsigned int 
 int get_next_id(master_table_t* master_table, table_id_t* id)
 {
     // Get first entry in linked list and check if NULL
-    table_entry_t* next = (table_entry_t*)UNTAG_PTR(master_table);
+    table_entry_t* next = master_table->head;
     ASSERT_RET(next != NULL, -1);
 
     // Assigns head to next in line
-    WRITE_ADDR(master_table, next->next);
+    master_table->head = next->next;
     next->next = NULL;
 
     *id = ENTRY_ID_FROM_ADDR(master_table->entries, next);
@@ -64,8 +64,8 @@ int return_id(master_table_t* master_table, table_id_t id)
     table_entry_t* entry = &master_table->entries[id];
     
     // Re-add to linked list
-    entry->next = (table_entry_t*)UNTAG_PTR(master_table);
-    WRITE_ADDR(master_table, entry);
+    entry->next = master_table->head;
+    master_table->head = entry;
     CLEAR_FLAG(entry->flags, ENTRY_USE_MASK);
 
     return 0;
