@@ -21,7 +21,7 @@ int master_table_init(master_table_t* master_table, void* entries, unsigned int 
         {
             master_table->entries[id].next = NULL;
             CLEAR_FLAG(master_table->entries[id].flags, ENTRY_USE_MASK);         
-            master_table->head = &master_table->entries[0];
+            atomic_store(&master_table->head, (_Atomic table_entry_t*)&master_table->entries[0]);
             return MASTER_INIT_SUCCESS;
         }
         
@@ -30,45 +30,60 @@ int master_table_init(master_table_t* master_table, void* entries, unsigned int 
 
     }
     
-    master_table->head = &master_table->entries[0];
+    atomic_store(&master_table->head, (_Atomic table_entry_t*)&master_table->entries[0]);
     return MASTER_INIT_SUCCESS;
 }
 
 #define ENTRY_ID_FROM_ADDR(base, addr) (addr - base)   // Derives the ID using pointer arithmetic
 
+int get_next_id(master_table_t* master_table, table_id_t* id) {
+    void* old_head = atomic_load(&master_table->head);
+    table_entry_t* new_node;
 
-int get_next_id(master_table_t* master_table, table_id_t* id)
-{
-    // Get first entry in linked list and check if NULL
-    table_entry_t* new = UNTAG_PTR(master_table->head);
-    ASSERT_RET(new != NULL, -1);
+    do {
+        new_node = UNTAG_PTR(old_head);
+        if (new_node == NULL) {
+            return -1; // List is empty
+        }
 
-    // Assigns head to next in line
-    master_table->head = new->next;
-    new->next = NULL;
-    master_table->head = PACK_FLAGS(master_table->head, EXTRACT_FLAGS(master_table->head) + 1);
+        void* next_node = new_node->next; 
+        void* new_head = PACK_FLAGS(next_node, EXTRACT_FLAGS(old_head) + 1);
 
-    *id = ENTRY_ID_FROM_ADDR(master_table->entries, new);
+        if (atomic_compare_exchange_weak(&master_table->head, &old_head, new_head)) {
+            break; 
+        }
+        
+    } while (1);
 
-    // Marks entry as inuse
-    SET_FLAG(new->flags, ENTRY_USE_MASK);
+    new_node->next = NULL;
+    *id = ENTRY_ID_FROM_ADDR(master_table->entries, new_node);
+
+    SET_FLAG(new_node->flags, ENTRY_USE_MASK); 
 
     return MASTER_GET_SUCCESS;
 }
 
+#include <stdatomic.h>
+
 int return_id(master_table_t* master_table, table_id_t id)
 {
-    // Check if entry is free
-    ASSERT_RET(!IS_FLAG(master_table->entries[id].flags, ENTRY_USE_MASK), MASTER_RETURN_UNUSED);
-
-    // Get entry addr
     table_entry_t* entry = &master_table->entries[id];
-    
-    // Re-add to linked list
-    entry->next = master_table->head;
-    master_table->head = entry;
+
+    if (!IS_FLAG(entry->flags, ENTRY_USE_MASK)) {
+        return MASTER_RETURN_UNUSED;
+    }
+
     CLEAR_FLAG(entry->flags, ENTRY_USE_MASK);
-    master_table->head = PACK_FLAGS(master_table->head, EXTRACT_FLAGS(master_table->head) + 1);
+
+    void* old_head = atomic_load(&master_table->head);
+    void* new_head;
+
+    do {
+        entry->next = old_head;
+
+        new_head = PACK_FLAGS(entry, EXTRACT_FLAGS(old_head) + 1);
+
+    } while (!atomic_compare_exchange_weak(&master_table->head, &old_head, new_head));
 
     return 0;
 }
