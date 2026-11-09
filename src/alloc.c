@@ -56,9 +56,22 @@ table_id_t salloc(heap_t* heap, size_t size)
 
 int sfree(heap_t* heap, table_id_t id)
 {
-    ASSERT_RET(IS_FLAG(heap->master_table->entries[id].flags, ENTRY_USE_MASK), -1);
+    uint16_t old_master_flags = atomic_load(&heap->master_table->entries[id].flags);
+    uint16_t new_master_flags;
+
+    do {
+        
+        if (!(old_master_flags & ENTRY_USE_MASK)) {
+            return 0; 
+        }
+        
+        
+        new_master_flags = old_master_flags & ~ENTRY_USE_MASK;
+
+    } while (!atomic_compare_exchange_weak(&heap->master_table->entries[id].flags, &old_master_flags, new_master_flags));
+
     heap_chunk_t* entry = (void*)heap->master_table->entries[id].raw - sizeof(heap_chunk_t);
-    CLEAR_FLAG(entry->flags, CHUNK_USE_MASK);
+    ATOMIC_CLEAR_FLAG(&entry->flags, CHUNK_USE_MASK);
 
     ASSERT_RET(return_id(heap->master_table, id) != MASTER_RETURN_UNUSED, -1);
 

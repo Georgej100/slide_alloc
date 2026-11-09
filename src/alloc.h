@@ -17,9 +17,9 @@
 typedef struct
 {
     size_t size;
-    uint16_t flags;
+    _Atomic uint16_t flags;
     unsigned int id; //TEMP TODO
-}__attribute__((__packed__)) heap_chunk_t;
+} heap_chunk_t;
 
 typedef struct 
 {
