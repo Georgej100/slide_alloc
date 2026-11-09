@@ -36,7 +36,7 @@ table_id_t salloc(heap_t* heap, size_t size)
         HEAP_ALLOC_NO_IDS);
     table_entry_t* entry = &heap->master_table->entries[id];
 
-    // Setup new chunk
+    // Setup user chunk
     heap_chunk_t* chunk = heap->head;
     SET_FLAG(chunk->flags, CHUNK_USE_MASK);
     chunk->size = size;
