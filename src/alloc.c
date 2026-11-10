@@ -1,9 +1,12 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <threads.h>
 #include "alloc.h"
 #include "assert.h"
 #include "masks.h"
 #include "master_table.h"
+
+thread_local void* hazard_pointers[4] = {NULL, NULL, NULL, NULL};
 
 int heap_init(heap_t* heap, void* memory, size_t size)
 {
@@ -76,4 +79,37 @@ int sfree(heap_t* heap, table_id_t id)
     ASSERT_RET(return_id(heap->master_table, id) != MASTER_RETURN_UNUSED, -1);
 
     return 0;
+}
+
+
+void* dereference(heap_t* heap, table_id_t id)
+{
+    void* addr = heap->master_table->entries[id].raw;
+    
+    for (int i = 0; i < 4; i++)
+    {
+        if(hazard_pointers[i] != NULL)
+        {
+            hazard_pointers[i] = addr;
+            return addr;
+        }
+    }
+
+    return NULL;
+}
+
+int exit_dereference(heap_t* heap, table_id_t id)
+{
+    void* addr = heap->master_table->entries[id].raw;
+    for (int i = 0; i < 4; i++)
+    {
+        if (hazard_pointers[i] == addr)
+        {
+            hazard_pointers[i] = NULL;
+            return 0;
+        }
+    }
+
+    return -1;
+    
 }
