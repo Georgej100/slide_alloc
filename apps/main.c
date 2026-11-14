@@ -25,13 +25,21 @@ int main(void)
     heap.master_table = &table;
 
     table_id_t b1 = salloc(&heap, 10);
-    table_id_t b2 = salloc(&heap, 10);
+    table_id_t b2 = salloc(&heap, 3);
     table_id_t b3 = salloc(&heap, 10);
 
     b1 = b1;
     b2 = b2;
     b3 = b3;
 
+    char* x = "AAAAAAAAAB";
+    memmove(dereference(&heap, b1), x, 10);
+
+    char* y = "BBBBBBBBBC";
+    memmove(dereference(&heap, b2), y, 3);
+
+    char* z = "CCCCCCCCCD";
+    memmove(dereference(&heap, b3), z, 10);
 
     print_heap(&heap);
 

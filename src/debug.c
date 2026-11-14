@@ -17,7 +17,6 @@ void print_heap( __attribute__ ((unused)) heap_t* heap)
         {
             
             printf("CHUNK @ %p | Raw pointer @ %p | ID: %d | Size: %d | STATUS: %s\nEND OF HEAP | HEAP->Head @ %p\n" , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), pointer->id,  (int)pointer->size, IS_FLAG(pointer->flags, CHUNK_USE_MASK) == 1 ? "INUSE" : "FREE", (void*)heap->head );
-    
             break;
         }
         

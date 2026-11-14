@@ -15,24 +15,22 @@ int bubble_compact(heap_t* heap)
 
         if(IS_FLAG(current->flags, CHUNK_USE_MASK) && total_free > 0)
         {
+            table_id_t id = current->id;
             heap_chunk_t* new = (void*)current - total_free;
 
             memmove(new, current, sizeof(heap_chunk_t) + current->size);
 
-            table_id_t id = current->id;
-
-            
-
             heap->master_table->entries[id].raw = new + sizeof(heap_chunk_t);
-        }
-
-        if(!IS_FLAG(current->flags, CHUNK_USE_MASK))
+        } 
+        else if(!IS_FLAG(current->flags, CHUNK_USE_MASK))
         {
             total_free += current->size + sizeof(heap_chunk_t);
         }
     }
 
-    heap->head = (heap_chunk_t *)((uintptr_t)heap->head - total_free);
+    heap->head = memmove((heap_chunk_t *)((uintptr_t)heap->head - total_free), heap->head, total_free);
+
+    heap->head->size += total_free;
 
     return total_free;
 }

@@ -17,7 +17,6 @@
 typedef struct
 {
     uint16_t size;
-    uint16_t prev_size;
     table_id_t id; 
     _Atomic uint8_t flags;
     _Atomic uint8_t reference_count;
@@ -47,3 +46,5 @@ table_id_t salloc(heap_t* heap, uint16_t size);
 int sfree(heap_t* heap, table_id_t id);
 
 void setup_chunk(heap_chunk_t* chunk, uint16_t size, table_id_t id, uint8_t flags);
+
+void* dereference(heap_t* heap, table_id_t id);
