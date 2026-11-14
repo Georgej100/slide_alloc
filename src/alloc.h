@@ -16,9 +16,11 @@
 
 typedef struct
 {
-    size_t size;
-    _Atomic uint16_t flags;
-    unsigned int id; //TEMP TODO
+    uint16_t size;
+    uint16_t prev_size;
+    table_id_t id; 
+    _Atomic uint8_t flags;
+    _Atomic uint8_t reference_count;
 } heap_chunk_t;
 
 typedef struct 
@@ -26,7 +28,7 @@ typedef struct
     void* memory;   // Memory array given by OS/Hardware
     master_table_t* master_table;
     heap_chunk_t* head;     // Head of bump allocator
-    size_t size;    // Size of total memory
+    uint16_t size;    // Size of total memory
 } heap_t;
 
 
@@ -38,8 +40,10 @@ typedef struct
  *  Returns 0 on success or error code beginning in HEAP_INIT
  *
  * */
-int heap_init(heap_t* heap, void* memory, size_t size);
+int heap_init(heap_t* heap, void* memory, uint16_t size);
 
-table_id_t salloc(heap_t* heap, size_t size);
+table_id_t salloc(heap_t* heap, uint16_t size);
 
 int sfree(heap_t* heap, table_id_t id);
+
+void setup_chunk(heap_chunk_t* chunk, uint16_t size, table_id_t id, uint8_t flags);

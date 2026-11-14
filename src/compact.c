@@ -5,7 +5,7 @@
 
 int bubble_compact(heap_t* heap, unsigned int n)
 {
-    size_t total_free = 0;
+    uint16_t total_free = 0;
     void* heap_pointer = heap->memory;
 
     while(n != 0)
@@ -19,10 +19,9 @@ int bubble_compact(heap_t* heap, unsigned int n)
 
             memmove(new, current, sizeof(heap_chunk_t) + current->size);
 
-            CLEAR_FLAG(current->flags, CHUNK_USE_MASK);
-
             table_id_t id = current->id;
-            current->id = -1;
+
+            
 
             heap->master_table->entries[id].raw = new + sizeof(heap_chunk_t);
         }

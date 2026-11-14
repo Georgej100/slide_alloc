@@ -6,9 +6,8 @@
 #include "masks.h"
 #include "master_table.h"
 
-thread_local void* hazard_pointers[4] = {NULL, NULL, NULL, NULL};
 
-int heap_init(heap_t* heap, void* memory, size_t size)
+int heap_init(heap_t* heap, void* memory, uint16_t size)
 {
     ASSERT_RET(memory != NULL, HEAP_INIT_INVALID_MEMORY);
     ASSERT_RET(size > sizeof(heap_chunk_t) + 1, HEAP_INIT_LOW_MEMORY);
@@ -26,12 +25,12 @@ int heap_init(heap_t* heap, void* memory, size_t size)
     return HEAP_INIT_SUCCESS;
 }
 
-table_id_t salloc(heap_t* heap, size_t size)
+table_id_t salloc(heap_t* heap, uint16_t size)
 {
     ASSERT_RET(heap != NULL, HEAP_ALLOC_INVALID_HEAP);
     ASSERT_RET(size > 0, HEAP_ALLOC_TOO_SMALL);
 
-    size_t prev_size = heap->head->size;
+    uint16_t prev_size = heap->head->size;
 
     // Get ID
     table_id_t id;
@@ -41,21 +40,23 @@ table_id_t salloc(heap_t* heap, size_t size)
 
     // Setup user chunk
     heap_chunk_t* chunk = heap->head;
-    SET_FLAG(chunk->flags, CHUNK_USE_MASK);
-    chunk->size = size;
-    chunk->id = id;
-
+    setup_chunk(chunk, size, id, CHUNK_USE_MASK);
     entry->raw = (void*)heap->head + sizeof(heap_chunk_t);
 
     // Setup next chunk
     heap->head = (void*)heap->head + sizeof(heap_chunk_t) + size;
-    heap->head->size = prev_size - sizeof(heap_chunk_t) - size;
-    heap->head->id = -1;
-    CLEAR_FLAG(heap->head->flags, CHUNK_USE_MASK);
+    setup_chunk(heap->head, (prev_size - sizeof(heap_chunk_t) - size), -1, 0);
 
     return id;
 }
 
+void setup_chunk(heap_chunk_t* chunk, uint16_t size, table_id_t id, uint8_t flags)
+{
+    chunk->flags = flags;
+    chunk->size = size;
+    chunk->id = id;
+    
+}
 
 int sfree(heap_t* heap, table_id_t id)
 {
@@ -86,30 +87,13 @@ void* dereference(heap_t* heap, table_id_t id)
 {
     void* addr = heap->master_table->entries[id].raw;
     
-    for (int i = 0; i < 4; i++)
-    {
-        if(hazard_pointers[i] != NULL)
-        {
-            hazard_pointers[i] = addr;
-            return addr;
-        }
-    }
-
-    return NULL;
+    return addr;
 }
-
+/*
 int exit_dereference(heap_t* heap, table_id_t id)
 {
-    void* addr = heap->master_table->entries[id].raw;
-    for (int i = 0; i < 4; i++)
-    {
-        if (hazard_pointers[i] == addr)
-        {
-            hazard_pointers[i] = NULL;
-            return 0;
-        }
-    }
+    //void* addr = heap->master_table->entries[id].raw;
 
-    return -1;
+    return 0;
     
-}
+*/

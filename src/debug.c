@@ -9,8 +9,9 @@ void print_heap( __attribute__ ((unused)) heap_t* heap)
 {    
 #ifdef DEBUG
     heap_chunk_t* pointer = heap->memory;
+    int n = 10;
 
-    while(1)
+    while(n != 0)
     {
         if(pointer == heap->head)
         {
@@ -19,10 +20,11 @@ void print_heap( __attribute__ ((unused)) heap_t* heap)
             break;
         }
         
-        printf("CHUNK @ %p | Raw pointer @ %p | ID: %d | Size: %d | STATUS: %s | " , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), pointer->id,  (int)pointer->size, IS_FLAG(pointer->flags, CHUNK_USE_MASK) == 1 ? "INUSE" : "FREE" );
+        printf("CHUNK @ %p | Raw pointer @ %p | ID: %d | Size: %d | STATUS: %s | " , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), pointer->id,  (int)pointer->size,  IS_FLAG(pointer->flags, CHUNK_USE_MASK) == 1 ? "INUSE" : "FREE" );
         pointer = (void*)pointer + sizeof(heap_chunk_t) + pointer->size;
         printf("Next Chunk @ %p\n", (void*)pointer);
 
+        n--;
     }
 
 #endif

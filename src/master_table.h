@@ -23,7 +23,7 @@ struct table_entry_t
     uint16_t flags;
 };
 
-typedef uint32_t table_id_t;
+typedef unsigned short table_id_t;
 
 typedef struct 
 {
