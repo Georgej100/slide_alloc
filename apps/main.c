@@ -25,7 +25,7 @@ int main(void)
     heap.master_table = &table;
 
     table_id_t b1 = salloc(&heap, 10);
-    table_id_t b2 = salloc(&heap, 3);
+    table_id_t b2 = salloc(&heap, 10);
     table_id_t b3 = salloc(&heap, 10);
 
     b1 = b1;

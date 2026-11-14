@@ -3,12 +3,12 @@
 #include "masks.h"
 #include "master_table.h"
 
-int bubble_compact(heap_t* heap, unsigned int n)
+int bubble_compact(heap_t* heap)
 {
     uint16_t total_free = 0;
     void* heap_pointer = heap->memory;
 
-    while(n != 0)
+    while(heap_pointer != heap->head)
     {
         heap_chunk_t* current = (heap_chunk_t*)heap_pointer;
         heap_pointer = heap_pointer + current->size + sizeof(heap_chunk_t);
@@ -30,11 +30,9 @@ int bubble_compact(heap_t* heap, unsigned int n)
         {
             total_free += current->size + sizeof(heap_chunk_t);
         }
-
-        n--;
     }
 
-    //heap->head = (heap_chunk_t *)((unsigned char*)heap->head - total_free);
+    heap->head = (heap_chunk_t *)((uintptr_t)heap->head - total_free);
 
     return total_free;
 }
