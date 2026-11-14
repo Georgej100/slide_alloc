@@ -85,15 +85,15 @@ int sfree(heap_t* heap, table_id_t id)
 
 void* dereference(heap_t* heap, table_id_t id)
 {
-    void* addr = heap->master_table->entries[id].raw;
-    
-    return addr;
+    heap_chunk_t* addr = heap->master_table->entries[id].raw - sizeof(heap_chunk_t);
+    atomic_fetch_add(&addr->reference_count, 1);
+    return (void*)addr + sizeof(heap_chunk_t);
 }
-/*
+
 int exit_dereference(heap_t* heap, table_id_t id)
 {
-    //void* addr = heap->master_table->entries[id].raw;
+    heap_chunk_t* addr = heap->master_table->entries[id].raw - sizeof(heap_chunk_t);
+    atomic_fetch_sub(&addr->reference_count, 1);
 
     return 0;
-    
-*/
+}    
