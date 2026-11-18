@@ -19,7 +19,7 @@ typedef struct
     uint16_t size;
     table_id_t id; 
     _Atomic uint8_t flags;
-    _Atomic uint8_t reference_count;
+    _Atomic int8_t reference_count;
 } heap_chunk_t;
 
 typedef struct 

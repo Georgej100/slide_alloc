@@ -85,8 +85,17 @@ int sfree(heap_t* heap, table_id_t id)
 
 void* dereference(heap_t* heap, table_id_t id)
 {
-    heap_chunk_t* addr = heap->master_table->entries[id].raw - sizeof(heap_chunk_t);
-    atomic_fetch_add(&addr->reference_count, 1);
+    
+    heap_chunk_t* addr = atomic_load(&heap->master_table->entries[id].raw) - sizeof(heap_chunk_t); // Thread safe??
+
+    int8_t old_ref = atomic_load(&addr->reference_count);
+
+    while (!atomic_compare_exchange_weak(&addr->reference_count, &old_ref, old_ref + 1))
+    {
+        while (old_ref != -1);
+    }
+    
+
     return (void*)addr + sizeof(heap_chunk_t);
 }
 
