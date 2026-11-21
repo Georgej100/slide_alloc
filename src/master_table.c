@@ -69,10 +69,11 @@ int return_id(master_table_t* master_table, table_id_t id)
 {
     table_entry_t* entry = &master_table->entries[id];
 
+    /*
     if (!IS_FLAG(entry->controls.flags, ENTRY_USE_MASK)) {
         return MASTER_RETURN_UNUSED;
     }
-
+    */
     CLEAR_FLAG(entry->controls.flags, ENTRY_USE_MASK);
 
     void* old_head = atomic_load(&master_table->head);

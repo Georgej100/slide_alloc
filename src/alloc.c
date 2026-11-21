@@ -20,7 +20,7 @@ int heap_init(heap_t* heap, void* memory, uint16_t size)
 
     heap->head = first;
     heap->memory = memory;
-    heap->size = size;
+    heap->size = size - sizeof(heap_chunk_t);
 
     return HEAP_INIT_SUCCESS;
 }
@@ -29,23 +29,25 @@ table_id_t salloc(heap_t* heap, uint16_t size)
 {
     ASSERT_RET(heap != NULL, HEAP_ALLOC_INVALID_HEAP);
     ASSERT_RET(size > 0, HEAP_ALLOC_TOO_SMALL);
-
-    uint16_t prev_size = heap->head->size;
-
-    // Get ID
+    
     table_id_t id;
     ASSERT_RET(get_next_id(heap->master_table, &id) == MASTER_GET_SUCCESS, 
         HEAP_ALLOC_NO_IDS);
-    table_entry_t* entry = &heap->master_table->entries[id];
 
-    // Setup user chunk
-    heap_chunk_t* chunk = heap->head;
-    setup_chunk(chunk, size, id, CHUNK_USE_MASK);
-    entry->raw = (void*)heap->head + sizeof(heap_chunk_t);
+    heap_t current_state = *heap;
+    heap_t new_state = current_state;
+    
+    do
+    {
+        ASSERT_RET(current_state.size > sizeof(heap_chunk_t) + size, -1)
 
-    // Setup next chunk
-    heap->head = (void*)heap->head + sizeof(heap_chunk_t) + size;
-    setup_chunk(heap->head, (prev_size - sizeof(heap_chunk_t) - size), -1, 0);
+        new_state.head = (void*)new_state.head + sizeof(heap_chunk_t) + size;
+        new_state.size = new_state.size - sizeof(heap_chunk_t) - size;    
+    } while (!atomic_compare_exchange_weak(heap, &current_state, new_state));
+
+    setup_chunk(current_state.head, size, id, CHUNK_USE_MASK);
+
+    heap->master_table->entries[id].raw = (void*)current_state.head + sizeof(heap_chunk_t);
 
     return id;
 }
@@ -69,7 +71,7 @@ int sfree(heap_t* heap, table_id_t id)
             return 0; 
         }
         
-        if(old_master.reference_count > 0)
+        if(old_master.reference_count != 0)
         {
             return -1;
         }
@@ -80,9 +82,10 @@ int sfree(heap_t* heap, table_id_t id)
     } while (!atomic_compare_exchange_weak(&heap->master_table->entries[id].controls, &old_master, new_master));
 
     heap_chunk_t* entry = (void*)heap->master_table->entries[id].raw - sizeof(heap_chunk_t);
-    ATOMIC_CLEAR_FLAG(&entry->flags, CHUNK_USE_MASK);
+    CLEAR_FLAG(entry->flags, CHUNK_USE_MASK);
+    entry->flags = 0;
 
-    ASSERT_RET(return_id(heap->master_table, id) != MASTER_RETURN_UNUSED, -1);
+    ASSERT_RET(return_id(heap->master_table, id) != MASTER_RETURN_UNUSED, -2);
 
     return 0;
 }

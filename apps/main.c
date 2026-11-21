@@ -1,5 +1,6 @@
 #include <pthread.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "debug.h"
 #include "alloc.h"
 #include "master_table.h"
@@ -47,7 +48,7 @@ int main(void)
     exit_dereference(&heap, b2);
     exit_dereference(&heap, b3);
 
-    sfree(&heap, b2);
+    printf("%d\n", sfree(&heap, b2));
 
     print_heap(&heap);
 

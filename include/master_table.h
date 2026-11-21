@@ -15,7 +15,7 @@
 typedef struct 
 {
     _Atomic int8_t reference_count;
-    uint16_t flags;
+    _Atomic uint16_t flags;
 } controls_t;
 
 typedef struct table_entry_t table_entry_t;
