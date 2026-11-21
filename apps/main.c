@@ -33,13 +33,13 @@ int main(void)
     b2 = b2;
     b3 = b3;
 
-    char* x = "AAAAAAAAAB";
+    char* x = "AAAAAAAAA\0";
     memmove(dereference(&heap, b1), x, 10);
 
-    char* y = "BBBBBBBBBC";
+    char* y = "BB\0";
     memmove(dereference(&heap, b2), y, 3);
 
-    char* z = "CCCCCCCCCD";
+    char* z = "CCCCCCCCC\0";
     memmove(dereference(&heap, b3), z, 10);
 
     print_heap(&heap);
@@ -55,6 +55,9 @@ int main(void)
     bubble_compact(&heap, 3);
 
     print_heap(&heap);
+
+    printf("%s", (char*)(dereference(&heap, b1)));
+    printf("%s", (char*)(dereference(&heap, b3)));
 
     free(memory);
 

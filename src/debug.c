@@ -26,8 +26,6 @@ void print_heap( __attribute__ ((unused)) heap_t* heap)
         n--;
     }
 
-    print_master_table(heap->master_table);
-
 #endif
 }
 

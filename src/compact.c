@@ -20,7 +20,7 @@ int bubble_compact(heap_t* heap)
 
             memmove(new, current, sizeof(heap_chunk_t) + current->size);
 
-            heap->master_table->entries[id].raw = new + sizeof(heap_chunk_t);
+            heap->master_table->entries[id].raw = (void*)new + sizeof(heap_chunk_t);
         } 
         else if(!IS_FLAG(current->flags, CHUNK_USE_MASK))
         {
