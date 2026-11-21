@@ -43,6 +43,10 @@ int main(void)
 
     print_heap(&heap);
 
+    exit_dereference(&heap, b1);
+    exit_dereference(&heap, b2);
+    exit_dereference(&heap, b3);
+
     sfree(&heap, b2);
 
     print_heap(&heap);

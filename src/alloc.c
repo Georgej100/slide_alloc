@@ -60,19 +60,24 @@ void setup_chunk(heap_chunk_t* chunk, uint16_t size, table_id_t id, uint8_t flag
 
 int sfree(heap_t* heap, table_id_t id)
 {
-    uint16_t old_master_flags = atomic_load(&heap->master_table->entries[id].flags);
-    uint16_t new_master_flags;
+    controls_t old_master = atomic_load(&heap->master_table->entries[id].controls);
+    controls_t new_master = old_master;
 
     do {
         
-        if (!(old_master_flags & ENTRY_USE_MASK)) {
+        if (!IS_FLAG(old_master.flags, ENTRY_USE_MASK)) {
             return 0; 
         }
         
+        if(old_master.reference_count > 0)
+        {
+            return -1;
+        }
         
-        new_master_flags = old_master_flags & ~ENTRY_USE_MASK;
+        CLEAR_FLAG(new_master.flags, ENTRY_USE_MASK);
+        new_master.reference_count = 0;
 
-    } while (!atomic_compare_exchange_weak(&heap->master_table->entries[id].flags, &old_master_flags, new_master_flags));
+    } while (!atomic_compare_exchange_weak(&heap->master_table->entries[id].controls, &old_master, new_master));
 
     heap_chunk_t* entry = (void*)heap->master_table->entries[id].raw - sizeof(heap_chunk_t);
     ATOMIC_CLEAR_FLAG(&entry->flags, CHUNK_USE_MASK);
@@ -82,27 +87,38 @@ int sfree(heap_t* heap, table_id_t id)
     return 0;
 }
 
-
 void* dereference(heap_t* heap, table_id_t id)
 {
-    
-    heap_chunk_t* addr = atomic_load(&heap->master_table->entries[id].raw) - sizeof(heap_chunk_t); // Thread safe??
+    controls_t current = atomic_load(&heap->master_table->entries[id].controls);
+    controls_t new = current;
 
-    int8_t old_ref = atomic_load(&addr->reference_count);
-
-    while (!atomic_compare_exchange_weak(&addr->reference_count, &old_ref, old_ref + 1))
+    do
     {
-        while (old_ref != -1);
-    }
-    
+        if(!IS_FLAG(current.flags, ENTRY_USE_MASK))
+        {
+            return NULL;
+        }
+        new.reference_count += 1;
+    } while (!atomic_compare_exchange_weak(&heap->master_table->entries[id].controls, &current, new));
 
-    return (void*)addr + sizeof(heap_chunk_t);
+    return heap->master_table->entries[id].raw;
+    
 }
 
 int exit_dereference(heap_t* heap, table_id_t id)
 {
-    heap_chunk_t* addr = heap->master_table->entries[id].raw - sizeof(heap_chunk_t);
-    atomic_fetch_sub(&addr->reference_count, 1);
+    controls_t current = atomic_load(&heap->master_table->entries[id].controls);
+    controls_t new = current;
+
+    do
+    {
+        if((current.reference_count < 1) || (!IS_FLAG(current.flags, ENTRY_USE_MASK)))
+        {
+            return -1;
+        }
+        new.reference_count -= 1;
+    } while (!atomic_compare_exchange_weak(&heap->master_table->entries[id].controls, &current, new));
 
     return 0;
-}    
+    
+}

@@ -12,6 +12,12 @@
 
 #define ENTRY_USE_MASK (1 << 0)
 
+typedef struct 
+{
+    _Atomic int8_t reference_count;
+    uint16_t flags;
+} controls_t;
+
 typedef struct table_entry_t table_entry_t;
 struct table_entry_t 
 {
@@ -20,7 +26,8 @@ struct table_entry_t
         void* raw;
         table_entry_t* next;
     };
-    uint16_t flags;
+
+    controls_t controls;
 };
 
 typedef unsigned short table_id_t;
