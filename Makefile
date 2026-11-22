@@ -1,6 +1,6 @@
 CC:=gcc
-IDIR:=./include/ 
-CFLAGS:=-Wall -Wextra -Werror -I$(IDIR)
+IDIR:=-I./include/ -I./src/
+CFLAGS:=-Wall -Wextra -Werror -lpthread $(IDIR)
 
 SRCS:= $(wildcard src/*.c)
 OBJS:= $(SRCS:src/%.c=build/obj/%.o)
@@ -8,7 +8,7 @@ DEPS:= $(wildcard src/*.h)
 
 LIBSLIDE:= bin/libslide.a
 
-DEBUG_FLAGS:= -g -O0 -DDEBUG=1
+DEBUG_FLAGS:= -g -fsanitize=thread -O0 -DDEBUG=1
 RELEASE_FLAGS:= -O2 -DRELEASE=1
 
 BUILD ?= debug

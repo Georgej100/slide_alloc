@@ -1,41 +1,81 @@
 #include <memory.h>
+#include <stdatomic.h>
 #include "alloc.h"
 #include "masks.h"
 #include "master_table.h"
 
-int bubble_compact(heap_t* heap, unsigned int n)
+enum State
 {
-    size_t total_free = 0;
-    void* heap_pointer = heap->memory;
+    FREE,
+    UNOBSERVED,
+    OBSERVED,
+};
 
-    while(n != 0)
+int bubble_compact(heap_t* heap)
+{
+    uint16_t free_behind = 0;
+    heap_chunk_t* current_chunk = heap->memory;
+    heap_chunk_t* next_chunk;
+    
+    while (current_chunk != heap->head)
     {
-        heap_chunk_t* current = (heap_chunk_t*)heap_pointer;
-        heap_pointer = heap_pointer + current->size + sizeof(heap_chunk_t);
-
-        if(IS_FLAG(current->flags, CHUNK_USE_MASK) && total_free > 0)
+        enum State current_state = FREE;
+        next_chunk = (void*)current_chunk + sizeof(heap_chunk_t) + current_chunk->size;
+        table_entry_t* entry = &heap->master_table->entries[current_chunk->id];
+        
+        if (!IS_FLAG(current_chunk->flags, CHUNK_USE_MASK))
         {
-            heap_chunk_t* new = (void*)current - total_free;
+            current_state = FREE;
+        }
+        else
+        {
+            controls_t expected_entry = atomic_load(&entry->controls);
+            controls_t new_entry = expected_entry;
 
-            memmove(new, current, sizeof(heap_chunk_t) + current->size);
+            do
+            {
+                if (expected_entry.reference_count > 0)
+                {
+                    current_state = OBSERVED;
+                    break;
+                }
+                
+                new_entry.reference_count = -1;
+                current_state = UNOBSERVED;
+            } while (!atomic_compare_exchange_weak(&entry->controls, &expected_entry, new_entry));
 
-            CLEAR_FLAG(current->flags, CHUNK_USE_MASK);
-
-            table_id_t id = current->id;
-            current->id = -1;
-
-            heap->master_table->entries[id].raw = new + sizeof(heap_chunk_t);
         }
 
-        if(!IS_FLAG(current->flags, CHUNK_USE_MASK))
+
+        switch (current_state)
         {
-            total_free += current->size + sizeof(heap_chunk_t);
+        case FREE:
+            free_behind += sizeof(heap_chunk_t) + current_chunk->size;
+            break;
+        
+        case OBSERVED:
+            free_behind = 0;
+            if(free_behind != 0)
+            {
+                heap_chunk_t* behind = (void*)current_chunk - free_behind;
+                behind->size = free_behind - sizeof(heap_chunk_t);
+                behind->id = -1;
+                behind->flags = 0;
+            }
+            break;
+        
+        case UNOBSERVED:
+            heap_chunk_t* new_spot = (void*)current_chunk - free_behind;
+            memmove(new_spot, current_chunk, (sizeof(heap_chunk_t) + current_chunk->size));
+            entry->raw = (void*)new_spot + sizeof(heap_chunk_t);
         }
 
-        n--;
+        current_chunk = next_chunk;
+        
     }
-
-    //heap->head = (heap_chunk_t *)((unsigned char*)heap->head - total_free);
-
-    return total_free;
+    
+    heap->head = (void*)heap->head - free_behind; //UNSAFE FIX PLZ
+    heap->size = heap->size + free_behind;
+    return free_behind;
+    
 }
