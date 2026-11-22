@@ -16,7 +16,7 @@ void print_heap( __attribute__ ((unused)) heap_t* heap)
         if(pointer == heap->head)
         {
             
-            printf("CHUNK @ %p | Raw pointer @ %p | ID: %d | Size: %d | STATUS: %d \nEND OF HEAP | HEAP->Head @ %p\n" , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), pointer->id,  (int)pointer->size, pointer->flags, (void*)heap->head );
+            printf("CHUNK @ %p | Raw pointer @ %p | ID: %d | Size: %d | STATUS: %d \nEND OF HEAP | HEAP->Head @ %p\n" , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), -1,  heap->size, pointer->flags, (void*)heap->head );
             break;
         }
         
@@ -29,7 +29,7 @@ void print_heap( __attribute__ ((unused)) heap_t* heap)
 #endif
 }
 
-void print_master_table(master_table_t* master)
+void print_master_table( __attribute__ ((unused)) master_table_t* master)
 {
 #ifdef DEBUG
 
