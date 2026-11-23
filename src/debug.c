@@ -9,7 +9,7 @@ void print_heap( __attribute__ ((unused)) heap_t* heap)
 {    
 #ifdef DEBUG
     heap_chunk_t* pointer = (void*)heap->memory;
-    int n = 7;
+    int n = 100;
 
     while(n != 0)
     {

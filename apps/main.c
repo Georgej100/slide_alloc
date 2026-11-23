@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include "libslide.h"
-/*
+
 heap_t heap;
 master_table_t master_table;
 
@@ -63,8 +63,9 @@ int main(void)
     return 0;    
 }
 
-*/
 
+
+/*
 int main(void)
 {
    
@@ -124,3 +125,4 @@ int main(void)
 
     return 0;    
 }
+*/
