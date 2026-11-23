@@ -15,7 +15,7 @@ int master_table_init(master_table_t* master_table, void* entries, unsigned int 
     master_table->amount_entries = num;
     master_table->entries = entries;
 
-    for (table_id_t id = 0; id < master_table->amount_entries; id++) 
+    for (uint32_t id = 0; id < master_table->amount_entries; id++) 
     {
         if (id == master_table->amount_entries - 1)
         {
@@ -67,8 +67,6 @@ int get_next_id(master_table_t* master_table, table_id_t* id) {
 
     return MASTER_GET_SUCCESS;
 }
-
-#include <stdatomic.h>
 
 int return_id(master_table_t* master_table, table_id_t id)
 {

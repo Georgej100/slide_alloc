@@ -18,11 +18,13 @@ int heap_init(heap_t* heap, void* memory, uint16_t size)
     CLEAR_FLAG(first->flags, CHUNK_USE_MASK);
 
 
-    
+    heap_state_t tmp = {
+        .head = first,
+        .size = size,
+    };
 
-    heap->head = (_Atomic heap_chunk_t*)first; // Mabye unsafe idk
+    atomic_store(&heap->state, tmp);
     heap->memory = memory;
-    heap->size = size - sizeof(heap_chunk_t);
 
     return HEAP_INIT_SUCCESS;
 }
@@ -31,28 +33,40 @@ table_id_t salloc(heap_t* heap, uint16_t size)
 {
     ASSERT_RET(heap != NULL, HEAP_ALLOC_INVALID_HEAP);
     ASSERT_RET(size > 0, HEAP_ALLOC_TOO_SMALL);
-    
+
     table_id_t id;
     get_next_id(heap->master_table, &id);
-    if(id == MASTER_GET_NONE_LEFT)
-    {
-        return HEAP_ALLOC_NO_IDS;
-    }
 
-    heap_t current_state = atomic_load(heap);
-    heap_t new_state = current_state;
-    
+    if (id < 0)
+        return HEAP_ALLOC_NO_IDS;
+
+    heap_state_t current = atomic_load(&heap->state);
+    heap_state_t next;
+
+    uint16_t required = sizeof(heap_chunk_t) + size;
+
     do
     {
-        ASSERT_RET(current_state.size > sizeof(heap_chunk_t) + size, -1)
+        if (current.size < required)
+            return HEAP_ALLOC_NO_IDS;
 
-        new_state.head = (void*)current_state.head + sizeof(heap_chunk_t) + size;
-        new_state.size = current_state.size - sizeof(heap_chunk_t) - size;    
-    } while (!atomic_compare_exchange_weak(heap, &current_state, new_state));
+        next = current;
 
-    setup_chunk((heap_chunk_t*)current_state.head, size, id, CHUNK_USE_MASK); // Cast possibly unsafe
+        next.head = (void*)current.head + required;
 
-    heap->master_table->entries[id].raw = (void*)current_state.head + sizeof(heap_chunk_t);
+        next.size -= required;
+
+    } while (!atomic_compare_exchange_weak(
+        &heap->state,
+        &current,
+        next
+    ));
+
+    heap_chunk_t* chunk = current.head;
+
+    setup_chunk(chunk, size, id, CHUNK_USE_MASK);
+
+    heap->master_table->entries[id].raw = (void*)chunk + sizeof(heap_chunk_t);
 
     return id;
 }

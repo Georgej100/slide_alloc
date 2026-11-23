@@ -3,12 +3,12 @@
 #include <stdatomic.h>
 
 #define MASTER_INIT_SUCCESS 0
-#define MASTER_INIT_NO_TABLE 1
+#define MASTER_INIT_NO_TABLE -1
 
-#define MASTER_GET_NONE_LEFT 1
+#define MASTER_GET_NONE_LEFT -1
 #define MASTER_GET_SUCCESS 0
 
-#define MASTER_RETURN_UNUSED 1
+#define MASTER_RETURN_UNUSED -1
 
 #define ENTRY_USE_MASK (1 << 0)
 
@@ -30,7 +30,7 @@ struct table_entry_t
     _Atomic controls_t controls;
 };
 
-typedef unsigned short table_id_t;
+typedef short table_id_t;
 
 typedef struct 
 {

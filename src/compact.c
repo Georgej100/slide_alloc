@@ -16,8 +16,10 @@ int bubble_compact(heap_t* heap)
     uint16_t free_behind = 0;
     heap_chunk_t* current_chunk = heap->memory;
     heap_chunk_t* next_chunk;
+
+    heap_state_t state = atomic_load(&heap->state);
     
-    while (current_chunk != (heap_chunk_t*)heap->head) // Mabye unsafe
+    while (current_chunk != (heap_chunk_t*)state.head) // Mabye unsafe
     {
         enum State current_state = FREE;
         next_chunk = (void*)current_chunk + sizeof(heap_chunk_t) + current_chunk->size;
@@ -78,9 +80,22 @@ int bubble_compact(heap_t* heap)
     }
     
 
+    heap_state_t current_state = atomic_load(&heap->state);
+    
+    
+    heap_state_t new_state = {
+        .head = (void*)current_state.head + free_behind,
+        .size = current_state.size + free_behind,
+    };
 
-    heap->head = (void*)heap->head - free_behind; //UNSAFE FIX PLZ
-    heap->size = heap->size + free_behind;
+    if(!atomic_compare_exchange_weak(&heap->state, &current_state, new_state))
+    {
+        new_state.head->size = free_behind - sizeof(heap_chunk_t);
+        new_state.head->id = -1;
+        new_state.head->flags = 0;
+    }
+    
+
     return free_behind;
     
 }
