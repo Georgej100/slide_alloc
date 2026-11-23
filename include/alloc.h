@@ -25,8 +25,8 @@ typedef struct
 {
     void* memory;   // Memory array given by OS/Hardware
     master_table_t* master_table;
-    heap_chunk_t* head;     // Head of bump allocator
-    uint16_t size;    // Size of total memory
+    _Atomic heap_chunk_t* head;     // Head of bump allocator
+    _Atomic uint16_t size;    // Size of total memory
 } heap_t;
 
 

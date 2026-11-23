@@ -20,12 +20,12 @@ int master_table_init(master_table_t* master_table, void* entries, unsigned int 
         if (id == master_table->amount_entries - 1)
         {
             master_table->entries[id].next = NULL;
-            CLEAR_FLAG(master_table->entries[id].controls.flags, ENTRY_USE_MASK);         
+            memset(&master_table->entries[id].controls, 0, sizeof(controls_t));         
             atomic_store(&master_table->head, (_Atomic table_entry_t*)&master_table->entries[0]);
             return MASTER_INIT_SUCCESS;
         }
         
-        CLEAR_FLAG(master_table->entries[id].controls.flags, ENTRY_USE_MASK);         
+        memset(&master_table->entries[id].controls, 0, sizeof(controls_t));      
         master_table->entries[id].next = &master_table->entries[id + 1];
 
     }
@@ -58,7 +58,12 @@ int get_next_id(master_table_t* master_table, table_id_t* id) {
     new_node->next = NULL;
     *id = ENTRY_ID_FROM_ADDR(master_table->entries, new_node);
 
-    SET_FLAG(new_node->controls.flags, ENTRY_USE_MASK); 
+    controls_t controls = {
+        .flags = ENTRY_USE_MASK,
+        .reference_count = 0,
+    };
+
+    atomic_store(&new_node->controls, controls);
 
     return MASTER_GET_SUCCESS;
 }
@@ -74,7 +79,12 @@ int return_id(master_table_t* master_table, table_id_t id)
         return MASTER_RETURN_UNUSED;
     }
     */
-    CLEAR_FLAG(entry->controls.flags, ENTRY_USE_MASK);
+    controls_t controls = {
+        .flags = 0,
+        .reference_count = 0,
+    };
+
+    atomic_store(&entry->controls, controls);
 
     void* old_head = atomic_load(&master_table->head);
     void* new_head;

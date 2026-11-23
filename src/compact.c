@@ -17,7 +17,7 @@ int bubble_compact(heap_t* heap)
     heap_chunk_t* current_chunk = heap->memory;
     heap_chunk_t* next_chunk;
     
-    while (current_chunk != heap->head)
+    while (current_chunk != (heap_chunk_t*)heap->head) // Mabye unsafe
     {
         enum State current_state = FREE;
         next_chunk = (void*)current_chunk + sizeof(heap_chunk_t) + current_chunk->size;
@@ -68,12 +68,17 @@ int bubble_compact(heap_t* heap)
             heap_chunk_t* new_spot = (void*)current_chunk - free_behind;
             memmove(new_spot, current_chunk, (sizeof(heap_chunk_t) + current_chunk->size));
             entry->raw = (void*)new_spot + sizeof(heap_chunk_t);
+            controls_t tmp = atomic_load(&entry->controls);
+            tmp.reference_count = 0;
+            atomic_store(&entry->controls, tmp);
         }
 
         current_chunk = next_chunk;
         
     }
     
+
+
     heap->head = (void*)heap->head - free_behind; //UNSAFE FIX PLZ
     heap->size = heap->size + free_behind;
     return free_behind;

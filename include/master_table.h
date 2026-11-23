@@ -14,8 +14,8 @@
 
 typedef struct 
 {
-    _Atomic int8_t reference_count;
-    _Atomic uint16_t flags;
+    int8_t reference_count;
+    uint16_t flags;
 } controls_t;
 
 typedef struct table_entry_t table_entry_t;
@@ -27,7 +27,7 @@ struct table_entry_t
         table_entry_t* next;
     };
 
-    controls_t controls;
+    _Atomic controls_t controls;
 };
 
 typedef unsigned short table_id_t;

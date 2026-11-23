@@ -13,14 +13,14 @@ void print_heap( __attribute__ ((unused)) heap_t* heap)
 
     while(n != 0)
     {
-        if(pointer == heap->head)
+        if(pointer == (heap_chunk_t*)heap->head) // Unsafe mabye
         {
             
             printf("CHUNK @ %p | Raw pointer @ %p | ID: %d | Size: %d | STATUS: %d \nEND OF HEAP | HEAP->Head @ %p\n" , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), -1,  heap->size, pointer->flags, (void*)heap->head );
             break;
         }
         
-        printf("CHUNK @ %p | Raw pointer @ %p | ID: %d | Size: %d | STATUS: %d " , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), pointer->id,  (int)pointer->size,  pointer->flags);
+        printf("CHUNK @ %p | Raw pointer @ %p \nID: %d | Size: %d | STATUS: %d " , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), pointer->id,  (int)pointer->size,  pointer->flags);
         pointer = (void*)pointer + sizeof(heap_chunk_t) + pointer->size;
         printf("Next Chunk @ %p\n", (void*)pointer);
         n--;
@@ -35,7 +35,8 @@ void print_master_table( __attribute__ ((unused)) master_table_t* master)
 
     for(table_id_t id = 0; id < master->amount_entries; id++)
     {
-        printf("ID: %d, STATUS: %s, REFs: %d\n", id, ATOMIC_IS_FLAG(&master->entries[id].controls.flags, ENTRY_USE_MASK) == 1 ? "INUSE" : "FREE", master->entries[id].controls.reference_count);
+        controls_t controls = atomic_load(&master->entries[id].controls);
+        printf("ID: %d, STATUS: %s, REFs: %d\n", id, IS_FLAG(controls.flags, ENTRY_USE_MASK) == 1 ? "INUSE" : "FREE", controls.reference_count);
     }
 
 #endif
