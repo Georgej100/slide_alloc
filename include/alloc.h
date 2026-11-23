@@ -21,12 +21,14 @@ typedef struct
     _Atomic uint8_t flags;
 } heap_chunk_t;
 
-typedef struct 
+
+typedef _Atomic struct 
 {
     void* memory;   // Memory array given by OS/Hardware
     master_table_t* master_table;
     _Atomic heap_chunk_t* head;     // Head of bump allocator
     _Atomic uint16_t size;    // Size of total memory
+    
 } heap_t;
 
 

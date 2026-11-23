@@ -18,6 +18,8 @@ int heap_init(heap_t* heap, void* memory, uint16_t size)
     CLEAR_FLAG(first->flags, CHUNK_USE_MASK);
 
 
+    
+
     heap->head = (_Atomic heap_chunk_t*)first; // Mabye unsafe idk
     heap->memory = memory;
     heap->size = size - sizeof(heap_chunk_t);
@@ -31,18 +33,21 @@ table_id_t salloc(heap_t* heap, uint16_t size)
     ASSERT_RET(size > 0, HEAP_ALLOC_TOO_SMALL);
     
     table_id_t id;
-    ASSERT_RET(get_next_id(heap->master_table, &id) == MASTER_GET_SUCCESS, 
-        HEAP_ALLOC_NO_IDS);
+    get_next_id(heap->master_table, &id);
+    if(id == MASTER_GET_NONE_LEFT)
+    {
+        return HEAP_ALLOC_NO_IDS;
+    }
 
-    heap_t current_state = *heap;
+    heap_t current_state = atomic_load(heap);
     heap_t new_state = current_state;
     
     do
     {
         ASSERT_RET(current_state.size > sizeof(heap_chunk_t) + size, -1)
 
-        new_state.head = (void*)new_state.head + sizeof(heap_chunk_t) + size;
-        new_state.size = new_state.size - sizeof(heap_chunk_t) - size;    
+        new_state.head = (void*)current_state.head + sizeof(heap_chunk_t) + size;
+        new_state.size = current_state.size - sizeof(heap_chunk_t) - size;    
     } while (!atomic_compare_exchange_weak(heap, &current_state, new_state));
 
     setup_chunk((heap_chunk_t*)current_state.head, size, id, CHUNK_USE_MASK); // Cast possibly unsafe
@@ -102,7 +107,7 @@ void* dereference(heap_t* heap, table_id_t id)
             return NULL;
         }
         
-        
+
         while(current.reference_count == -1);
         new.reference_count += 1;
     } while (!atomic_compare_exchange_weak(&heap->master_table->entries[id].controls, &current, new));
