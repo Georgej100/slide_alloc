@@ -10,11 +10,23 @@ master_table_t master_table;
 
 void* worker(void* arg)
 {
+    table_id_t ids[10];
     
-    table_id_t id = salloc(&heap, (rand() % (100 - 3 + 1) + 3));
+    for (int i = 0; i < 10; i++)
+    {
+        ids[i] = salloc(&heap, (rand() % (100 - 3 + 1) + 3));
+    }
     
-    id = id;    
+    
+    for (int i = 0; i < 5; i++)
+    {
+        table_id_t id = (rand() % (9 - 0 + 1) + 0);
+        sfree(&heap, ids[id]);
+    }
+    
     arg = arg;
+
+    *ids = *ids;
 
     return NULL;
 }
@@ -58,8 +70,13 @@ int main(void)
     }
 
     print_heap(&heap);
-    print_master_table(&master_table);
+    //print_master_table(&master_table);
+    printf("__________________________\n");
+
+    bubble_compact(&heap);
     
+    print_heap(&heap);
+
     return 0;    
 }
 

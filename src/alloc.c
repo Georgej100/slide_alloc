@@ -103,6 +103,7 @@ int sfree(heap_t* heap, table_id_t id)
     heap_chunk_t* entry = (void*)heap->master_table->entries[id].raw - sizeof(heap_chunk_t);
     CLEAR_FLAG(entry->flags, CHUNK_USE_MASK);
     entry->flags = 0;
+    entry->id = -1;
 
     ASSERT_RET(return_id(heap->master_table, id) != MASTER_RETURN_UNUSED, -2);
 
