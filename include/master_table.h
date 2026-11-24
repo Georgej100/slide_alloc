@@ -14,23 +14,23 @@
 
 typedef struct 
 {
+    uint8_t flags;
     int8_t reference_count;
-    uint16_t flags;
 } controls_t;
 
 typedef struct table_entry_t table_entry_t;
 struct table_entry_t 
 {
+    _Atomic controls_t controls;
+    
     union 
     {
         void* raw;
         table_entry_t* next;
     };
-
-    _Atomic controls_t controls;
 };
 
-typedef short table_id_t;
+typedef int8_t table_id_t;
 
 typedef struct 
 {

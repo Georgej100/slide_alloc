@@ -20,7 +20,7 @@ void* worker(void* arg)
     
     for (int i = 0; i < 10; i++)
     {
-        sfree(&heap, ids[i]);
+        //sfree(&heap, ids[i]);
     }
     
     arg = arg;
@@ -81,67 +81,3 @@ int main(void)
 
     return 0;    
 }
-
-
-
-/*
-int main(void)
-{
-   
-
-    void* memory = malloc(4096);
-    table_entry_t* entries = (table_entry_t*)malloc(20 * sizeof(table_entry_t));
-    memset(memory, 0, 4096);
-    memset(entries, 0, 20);
-
-    master_table_t table;
-    heap_t heap;
-
-    
-
-    master_table_init(&table, entries, 20);
-    heap_init(&heap, memory, 4096);
-    heap.master_table = &table;
-
-    table_id_t b1 = salloc(&heap, 10);
-    table_id_t b2 = salloc(&heap, 3);
-    table_id_t b3 = salloc(&heap, 10);
-
-    b1 = b1;
-    b2 = b2;
-    b3 = b3;
-
-    print_master_table(&table);
-
-    char* x = "AAAAAAAAA\0";
-    memmove(dereference(&heap, b1), x, 10);
-
-    char* y = "BB\0";
-    memmove(dereference(&heap, b2), y, 3);
-
-    char* z = "CCCCCCCCC\0";
-    memmove(dereference(&heap, b3), z, 10);
-
-    print_heap(&heap);
-
-    exit_dereference(&heap, b1);
-    exit_dereference(&heap, b2);
-    exit_dereference(&heap, b3);
-
-    printf("%d\n", sfree(&heap, b2));
-
-    print_heap(&heap);
-
-    bubble_compact(&heap, 3);
-
-    print_heap(&heap);
-
-    printf("%s", (char*)(dereference(&heap, b1)));
-    printf("%s", (char*)(dereference(&heap, b3)));
-
-    free(memory);
-
-
-    return 0;    
-}
-*/

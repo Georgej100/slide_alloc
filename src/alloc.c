@@ -5,6 +5,7 @@
 #include "assert.h"
 #include "masks.h"
 #include "master_table.h"
+#include "globals.h"
 
 
 int heap_init(heap_t* heap, void* memory, uint16_t size)
