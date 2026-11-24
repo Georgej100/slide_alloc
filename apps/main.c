@@ -18,10 +18,9 @@ void* worker(void* arg)
     }
     
     
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 10; i++)
     {
-        table_id_t id = (rand() % (9 - 0 + 1) + 0);
-        sfree(&heap, ids[id]);
+        sfree(&heap, ids[i]);
     }
     
     arg = arg;
@@ -72,6 +71,9 @@ int main(void)
     print_heap(&heap);
     //print_master_table(&master_table);
     printf("__________________________\n");
+
+    table_id_t id = salloc(&heap, 13);
+    id = id;
 
     bubble_compact(&heap);
     

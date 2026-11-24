@@ -52,7 +52,7 @@ int bubble_compact(heap_t* heap)
         switch (current_state)
         {
         case FREE:
-            free_behind += sizeof(heap_chunk_t) + current_chunk->size;
+            free_behind = free_behind + sizeof(heap_chunk_t) + current_chunk->size;
             break;
         
         case OBSERVED:
@@ -84,7 +84,7 @@ int bubble_compact(heap_t* heap)
     
     
     heap_state_t new_state = {
-        .head = (void*)current_state.head + free_behind,
+        .head = (void*)current_state.head - free_behind,
         .size = current_state.size + free_behind,
     };
 
