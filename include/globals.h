@@ -2,8 +2,7 @@
 #include "alloc.h"
 #include "master_table.h"
 
-heap_t heap;
-
-master_table_t master_table;
-
-table_entry_t* entries;
+// Declared in alloc.c
+extern heap_t global_heap;
+extern master_table_t global_table_state;
+extern table_entry_t* global_table;

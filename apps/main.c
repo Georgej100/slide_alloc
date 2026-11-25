@@ -5,8 +5,7 @@
 #include <stdio.h>
 #include "libslide.h"
 
-heap_t heap;
-master_table_t master_table;
+
 
 void* worker(void* arg)
 {
@@ -14,7 +13,7 @@ void* worker(void* arg)
     
     for (int i = 0; i < 10; i++)
     {
-        ids[i] = salloc(&heap, (rand() % (100 - 3 + 1) + 3));
+        ids[i] = salloc(30);
     }
     
     
@@ -32,29 +31,10 @@ void* worker(void* arg)
 
 int main(void)
 {
-    void* heap_memory = mmap(NULL, sysconf(_SC_PAGESIZE) * 4, (PROT_READ | PROT_WRITE),
-        (MAP_PRIVATE | MAP_ANONYMOUS), -1, 0);
-    
-    if(heap_memory == MAP_FAILED)
-    {
-        exit(EXIT_FAILURE);
-    }
-    
-    heap_init(&heap, heap_memory, sysconf(_SC_PAGESIZE) * 4);
+    heap_init(sysconf(_SC_PAGE_SIZE) * 4);
 
-    void* table_memory = mmap(NULL, sizeof(table_entry_t) * 400, (PROT_READ | PROT_WRITE),
-        (MAP_PRIVATE | MAP_ANONYMOUS), -1, 0);
-    
-    if (table_memory == MAP_FAILED)
-    {
-        exit(EXIT_FAILURE);
-    }
-
-    
-    master_table_init(&master_table, table_memory, 400);
-
-    heap.master_table = &master_table;
-
+    table_id_t id = salloc(42);
+    id = id;
 
     pthread_t thread[10];
 
@@ -68,16 +48,7 @@ int main(void)
         pthread_join(thread[i], NULL);
     }
 
-    print_heap(&heap);
-    //print_master_table(&master_table);
-    printf("__________________________\n");
-
-    table_id_t id = salloc(&heap, 13);
-    id = id;
-
-    bubble_compact(&heap);
-    
-    print_heap(&heap);
+    print_heap();
 
     return 0;    
 }

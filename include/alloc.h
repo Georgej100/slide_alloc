@@ -43,14 +43,14 @@ typedef struct
  *  Returns 0 on success or error code beginning in HEAP_INIT
  *
  * */
-int heap_init(heap_t* heap, void* memory, uint16_t size);
+int heap_init(uint16_t size);
 
-table_id_t salloc(heap_t* heap, uint16_t size);
+table_id_t salloc(uint16_t size);
 
-int sfree(heap_t* heap, table_id_t id);
+int sfree(table_id_t id);
 
 void setup_chunk(heap_chunk_t* chunk, uint16_t size, table_id_t id, uint8_t flags);
 
-void* dereference(heap_t* heap, table_id_t id);
+void* dereference(table_id_t id);
 
-int exit_dereference(heap_t* heap, table_id_t id);
+int exit_dereference(table_id_t id);

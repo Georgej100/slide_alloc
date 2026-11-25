@@ -3,6 +3,7 @@
 #include "alloc.h"
 #include "masks.h"
 #include "master_table.h"
+#include "globals.h"
 
 enum State
 {
@@ -11,19 +12,19 @@ enum State
     OBSERVED,
 };
 
-int bubble_compact(heap_t* heap)
+int bubble_compact()
 {
     uint16_t free_behind = 0;
-    heap_chunk_t* current_chunk = heap->memory;
+    heap_chunk_t* current_chunk = global_heap.memory;
     heap_chunk_t* next_chunk;
 
-    heap_state_t state = atomic_load(&heap->state);
+    heap_state_t state = atomic_load(&global_heap.state);
     
     while (current_chunk != (heap_chunk_t*)state.head) // Mabye unsafe
     {
         enum State current_state = FREE;
         next_chunk = (void*)current_chunk + sizeof(heap_chunk_t) + current_chunk->size;
-        table_entry_t* entry = &heap->master_table->entries[current_chunk->id];
+        table_entry_t* entry = &global_table[current_chunk->id];
         
         if (!IS_FLAG(current_chunk->flags, CHUNK_USE_MASK))
         {
@@ -80,7 +81,7 @@ int bubble_compact(heap_t* heap)
     }
     
 
-    heap_state_t current_state = atomic_load(&heap->state);
+    heap_state_t current_state = atomic_load(&global_heap.state);
     
     
     heap_state_t new_state = {
@@ -88,7 +89,7 @@ int bubble_compact(heap_t* heap)
         .size = current_state.size + free_behind,
     };
 
-    if(!atomic_compare_exchange_weak(&heap->state, &current_state, new_state))
+    if(!atomic_compare_exchange_weak(&global_heap.state, &current_state, new_state))
     {
         new_state.head->size = free_behind - sizeof(heap_chunk_t);
         new_state.head->id = -1;

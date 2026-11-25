@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdatomic.h>
 
+#define MASTER_TABLE_SIZE 400
+
 #define MASTER_INIT_SUCCESS 0
 #define MASTER_INIT_NO_TABLE -1
 
@@ -42,6 +44,6 @@ typedef struct
 
 int master_table_init(master_table_t* master_table, void* entries, unsigned int num);
 
-int get_next_id(master_table_t* master_table, table_id_t* id);
+int get_next_id(table_id_t* id);
 
-int return_id(master_table_t* master_table, table_id_t id);
+int return_id(table_id_t id);
