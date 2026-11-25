@@ -37,8 +37,8 @@ int master_table_init(master_table_t* master_table, void* entries, unsigned int 
 
 #define ENTRY_ID_FROM_ADDR(base, addr) (addr - base)   // Derives the ID using pointer arithmetic
 
-int get_next_id(table_id_t* id) {
-    void* old_head = atomic_load(&global_table_state.head);
+int get_next_id(master_table_t* master_table, table_id_t* id) {
+    void* old_head = atomic_load(&master_table->head);
     table_entry_t* new_node;
 
     do {
@@ -50,14 +50,14 @@ int get_next_id(table_id_t* id) {
         void* next_node = new_node->next; 
         void* new_head = PACK_FLAGS(next_node, EXTRACT_FLAGS(old_head) + 1);
 
-        if (atomic_compare_exchange_weak(&global_table_state.head, &old_head, new_head)) {
+        if (atomic_compare_exchange_weak(&master_table->head, &old_head, new_head)) {
             break; 
         }
         
     } while (1);
 
     new_node->next = NULL;
-    *id = ENTRY_ID_FROM_ADDR(global_table, new_node);
+    *id = ENTRY_ID_FROM_ADDR(master_table->entries, new_node);
 
     controls_t controls = {
         .flags = ENTRY_USE_MASK,
@@ -68,6 +68,7 @@ int get_next_id(table_id_t* id) {
 
     return MASTER_GET_SUCCESS;
 }
+
 
 int return_id(table_id_t id)
 {
