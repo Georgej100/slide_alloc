@@ -45,3 +45,17 @@ void print_master_table()
 
 #endif
 }
+
+void print_master_free()
+{
+    table_entry_t* current = (table_entry_t*)global_table_state.head;
+    while(1)
+    {
+        printf("ENTRY @ %p\n", (void*)current);
+        current = current->next;
+        if(current->next == NULL)
+        {
+            break;
+        }
+    }
+}

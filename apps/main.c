@@ -1,4 +1,4 @@
-/*
+
 #include "stress.h"
 
 int main(void)
@@ -7,8 +7,9 @@ int main(void)
 
     return 0;    
 }
-*/
 
+
+/*
 #include <sys/mman.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -52,3 +53,4 @@ int main(void)
     
     return 0;    
 }
+    */

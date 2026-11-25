@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <time.h>
 #include "stress.h"
@@ -68,9 +69,13 @@ int stress(void)
         exit(EXIT_FAILURE);
     }
 
-    pthread_t thread[1];
+    print_master_free();
 
-    for (int i = 0; i < 10; i++)
+    
+
+    pthread_t thread[THREAD_COUNT];
+
+    for (int i = 0; i < THREAD_COUNT; i++)
     {
         pthread_create(&thread[i], NULL, worker, NULL);
     }
@@ -80,4 +85,6 @@ int stress(void)
         delay(2);
         bubble_compact();
     }
+
+    
 }

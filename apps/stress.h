@@ -2,7 +2,7 @@
 #include "libslide.h"
 
 #define THREAD_COUNT 30
-#define TOTAL_ALLOCATIONS 30000
+#define TOTAL_ALLOCATIONS 300
 #define USE_SALLOC
 
 #define RNG_SEED 131313
