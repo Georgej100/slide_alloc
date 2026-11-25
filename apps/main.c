@@ -1,3 +1,14 @@
+/*
+#include "stress.h"
+
+int main(void)
+{
+    stress();
+
+    return 0;    
+}
+*/
+
 #include <sys/mman.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -5,50 +16,39 @@
 #include <stdio.h>
 #include "libslide.h"
 
-
-
 void* worker(void* arg)
 {
-    table_id_t ids[10];
     
-    for (int i = 0; i < 10; i++)
+    table_id_t id = salloc((rand() % (100 - 3 + 1) + 3));
+    if(id < 0)
     {
-        ids[i] = salloc(30);
+        printf("FUCK\n");
     }
-    
-    
-    for (int i = 0; i < 10; i++)
-    {
-        //sfree(&heap, ids[i]);
-    }
-    
-    arg = arg;
+    sfree(id);
 
-    *ids = *ids;
+    id = id;    
+    arg = arg;
 
     return NULL;
 }
 
 int main(void)
 {
-    heap_init(sysconf(_SC_PAGE_SIZE) * 4);
+    heap_init(sysconf(_SC_PAGE_SIZE) * 10);
 
-    table_id_t id = salloc(42);
-    id = id;
+    pthread_t thread[260];
 
-    pthread_t thread[10];
-
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 260; i++)
     {
         pthread_create(&thread[i], NULL, worker, NULL);
     }
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 260; i++)
     {
         pthread_join(thread[i], NULL);
     }
 
     print_heap();
-
+    
     return 0;    
 }

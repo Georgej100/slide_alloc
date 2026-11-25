@@ -1,6 +1,6 @@
 CC:=gcc
 IDIR:=-I./include/ -I./src/
-CFLAGS:=-Wall -Wextra -Werror -lpthread -mcx16 -latomic $(IDIR)
+CFLAGS:=-Wall -Wextra -Werror -lpthread -lm -latomic $(IDIR)
 
 SRCS:= $(wildcard src/*.c)
 DEPS:= $(wildcard src/*.h)

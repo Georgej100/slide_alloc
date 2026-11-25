@@ -123,6 +123,8 @@ int sfree(table_id_t id)
             return -1;
         }
         
+        new_master = old_master;
+
         CLEAR_FLAG(new_master.flags, ENTRY_USE_MASK);
         new_master.reference_count = 0;
 

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdatomic.h>
 
-#define MASTER_TABLE_SIZE 400
+#define MASTER_TABLE_SIZE 8000
 
 #define MASTER_INIT_SUCCESS 0
 #define MASTER_INIT_NO_TABLE -1
