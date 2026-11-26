@@ -1,6 +1,6 @@
 CC:=gcc
 IDIR:=-I./include/ -I./src/
-CFLAGS:=-Wall -Wextra -Werror -lpthread -lm -latomic $(IDIR)
+CFLAGS:=-Wall -Wextra -Werror -lpthread $(IDIR)
 
 SRCS:= $(wildcard src/*.c)
 DEPS:= $(wildcard src/*.h)
@@ -39,7 +39,7 @@ $(LIBSLIDE): $(OBJS)
 	ar rcs $(LIBSLIDE) $(OBJS)
 
 app:
-	$(CC) $(CFLAGS) apps/main.c apps/stress.c $(LIBSLIDE) -o bin/a.out
+	$(CC) $(CFLAGS) apps/main.c $(LIBSLIDE) -o bin/a.out
 
 clean:
 	rm -rf $(TMP_DIR)

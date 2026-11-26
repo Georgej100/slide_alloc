@@ -2,29 +2,25 @@
 #include "debug.h"
 #include "alloc.h"
 #include "masks.h"
-#include "globals.h"
 
 
 
-void print_heap()
+void print_heap( __attribute__ ((unused)) heap_t* heap)
 {    
 #ifdef DEBUG
-    heap_chunk_t* pointer = (void*)global_heap.memory;
+    heap_chunk_t* pointer = (void*)heap->memory;
     int n = 101;
 
     while(n != 0)
     {
-        if(pointer == atomic_load(&global_heap.state).head) // Unsafe mabye
+        if(pointer == atomic_load(&heap->state).head) // Unsafe mabye
         {
             
-            printf("CHUNK @ %p | Raw pointer @ %p \nID: %d | Size: %d | STATUS: %d \nEND OF HEAP | HEAP->Head @ %p\n" , 
-                (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), -1,  atomic_load(&global_heap.state).size, pointer->flags, 
-                (void*)atomic_load(&global_heap.state).head );
+            printf("CHUNK @ %p | Raw pointer @ %p \nID: %d | Size: %d | STATUS: %d \nEND OF HEAP | HEAP->Head @ %p\n" , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), -1,  atomic_load(&heap->state).size, pointer->flags, (void*)atomic_load(&heap->state).head );
             break;
         }
         
-        printf("CHUNK @ %p | Raw pointer @ %p \nID: %d | Size: %d | STATUS: %d " , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), 
-            pointer->id,  (int)pointer->size,  pointer->flags);
+        printf("CHUNK @ %p | Raw pointer @ %p \nID: %d | Size: %d | STATUS: %d " , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), pointer->id,  (int)pointer->size,  pointer->flags);
         pointer = (void*)pointer + sizeof(heap_chunk_t) + pointer->size;
         printf("Next Chunk @ %p\n", (void*)pointer);
         n--;
@@ -33,29 +29,15 @@ void print_heap()
 #endif
 }
 
-void print_master_table()
+void print_master_table( __attribute__ ((unused)) master_table_t* master)
 {
 #ifdef DEBUG
 
-    for(uint32_t id = 0; id < global_table_state.amount_entries; id++)
+    for(uint32_t id = 0; id < master->amount_entries; id++)
     {
-        controls_t controls = atomic_load(&global_table[id].controls);
+        controls_t controls = atomic_load(&master->entries[id].controls);
         printf("ID: %d, STATUS: %s, REFs: %d\n", id, IS_FLAG(controls.flags, ENTRY_USE_MASK) == 1 ? "INUSE" : "FREE", controls.reference_count);
     }
 
 #endif
-}
-
-void print_master_free()
-{
-    table_entry_t* current = (table_entry_t*)global_table_state.head;
-    while(1)
-    {
-        printf("ENTRY @ %p\n", (void*)current);
-        current = current->next;
-        if(current->next == NULL)
-        {
-            break;
-        }
-    }
 }

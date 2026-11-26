@@ -2,8 +2,6 @@
 #include <stdint.h>
 #include <stdatomic.h>
 
-#define MASTER_TABLE_SIZE 8000
-
 #define MASTER_INIT_SUCCESS 0
 #define MASTER_INIT_NO_TABLE -1
 
@@ -16,23 +14,23 @@
 
 typedef struct 
 {
-    uint8_t flags;
     int8_t reference_count;
+    uint16_t flags;
 } controls_t;
 
 typedef struct table_entry_t table_entry_t;
 struct table_entry_t 
 {
-    _Atomic controls_t controls;
-    
     union 
     {
         void* raw;
         table_entry_t* next;
     };
+
+    _Atomic controls_t controls;
 };
 
-typedef int8_t table_id_t;
+typedef short table_id_t;
 
 typedef struct 
 {
@@ -44,6 +42,6 @@ typedef struct
 
 int master_table_init(master_table_t* master_table, void* entries, unsigned int num);
 
-int get_next_id(table_id_t* id);
+int get_next_id(master_table_t* master_table, table_id_t* id);
 
-int return_id(table_id_t id);
+int return_id(master_table_t* master_table, table_id_t id);

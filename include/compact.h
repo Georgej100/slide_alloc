@@ -1,4 +1,4 @@
 #pragma once
 #include "alloc.h"
 
-int bubble_compact();
+int bubble_compact(heap_t* heap);

@@ -5,7 +5,6 @@
 #include "masks.h"
 #include "assert.h"
 #include "tagging.h"
-#include "globals.h"
 
 #include <stdio.h>
 
@@ -69,10 +68,9 @@ int get_next_id(master_table_t* master_table, table_id_t* id) {
     return MASTER_GET_SUCCESS;
 }
 
-
-int return_id(table_id_t id)
+int return_id(master_table_t* master_table, table_id_t id)
 {
-    table_entry_t* entry = &global_table[id];
+    table_entry_t* entry = &master_table->entries[id];
 
     /*
     if (!IS_FLAG(entry->controls.flags, ENTRY_USE_MASK)) {
@@ -86,7 +84,7 @@ int return_id(table_id_t id)
 
     atomic_store(&entry->controls, controls);
 
-    void* old_head = atomic_load(&global_table_state.head);
+    void* old_head = atomic_load(&master_table->head);
     void* new_head;
 
     do {
@@ -94,7 +92,7 @@ int return_id(table_id_t id)
 
         new_head = PACK_FLAGS(entry, EXTRACT_FLAGS(old_head) + 1);
 
-    } while (!atomic_compare_exchange_weak(&global_table_state.head, &old_head, new_head));
+    } while (!atomic_compare_exchange_weak(&master_table->head, &old_head, new_head));
 
     return 0;
 }
