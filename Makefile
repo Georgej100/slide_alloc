@@ -22,6 +22,14 @@ else
 	TMP_DIR:= ./build/obj/debug bin
 endif
 
+SYSTEM ?= std
+
+ifeq ($(SYSTEM),std)
+    CFLAGS += -DUSE_STD_SYS
+else
+    CFLAGS += -DUSE_EMBEDDED_SYS
+endif
+
 .PHONY: all clean 
 
 all: clean $(LIBSLIDE) app

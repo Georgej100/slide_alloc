@@ -10,20 +10,20 @@ master_table_t master_table;
 
 void* worker(void* arg)
 {
-    table_id_t ids[1000];
+    table_id_t ids[100];
     
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 100; i++)
     {
         ids[i] = salloc(&heap, 1);
+        if(ids[i] < 0)
+        {
+            printf("A\n");
+        }
+        //printf("%d\n", ids[i]);
         //sfree(&heap, ids[i]);
     }
-    
-    
-    for (int i = 0; i < 10; i++)
-    {
-        
-    }
-    
+    printf("Done\n");
+
     arg = arg;
 
     *ids = *ids;
@@ -33,24 +33,10 @@ void* worker(void* arg)
 
 int main(void)
 {
-    void* heap_memory = mmap(NULL, sysconf(_SC_PAGESIZE) * 9000, (PROT_READ | PROT_WRITE),
-        (MAP_PRIVATE | MAP_ANONYMOUS), -1, 0);
-    
-    if(heap_memory == MAP_FAILED)
-    {
-        exit(EXIT_FAILURE);
-    }
-    
-    heap_init(&heap, heap_memory, sysconf(_SC_PAGESIZE) * 9000);
+    heap_init(&heap, 1000);
 
-    void* table_memory = mmap(NULL, sizeof(table_entry_t) * 20000, (PROT_READ | PROT_WRITE),
-        (MAP_PRIVATE | MAP_ANONYMOUS), -1, 0);
-    
-    if (table_memory == MAP_FAILED)
-    {
-        exit(EXIT_FAILURE);
-    }    
-    master_table_init(&master_table, table_memory, 20000);
+    table_entry_t* table_mem = malloc(10000 * sizeof(heap_chunk_t));
+    master_table_init(&master_table, table_mem, 10000);
 
     heap.master_table = &master_table;
 
@@ -66,16 +52,16 @@ int main(void)
         pthread_join(thread[i], NULL);
     }
 
-    print_heap(&heap);
+    //print_heap(&heap);
     //print_master_table(&master_table);
     printf("__________________________\n");
 
     table_id_t id = salloc(&heap, 13);
     id = id;
 
-    bubble_compact(&heap);
+    //bubble_compact(&heap);
     
-    print_heap(&heap);
+    //print_heap(&heap);
 
     return 0;    
 }

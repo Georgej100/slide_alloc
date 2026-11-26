@@ -1,30 +1,37 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <threads.h>
+#include <stdio.h>
 #include "alloc.h"
 #include "assert.h"
 #include "masks.h"
 #include "master_table.h"
+#include "heap_manager.h"
 
 
-int heap_init(heap_t* heap, void* memory, uint16_t size)
+int heap_init(heap_t* heap, uint16_t initial_size)
 {
-    ASSERT_RET(memory != NULL, HEAP_INIT_INVALID_MEMORY);
-    ASSERT_RET(size > sizeof(heap_chunk_t) + 1, HEAP_INIT_LOW_MEMORY);
+    ASSERT_RET(initial_size > sizeof(heap_chunk_t) + 1, HEAP_INIT_LOW_MEMORY);
     ASSERT_RET(heap != NULL, HEAP_INIT_INVALID_HEAP);
 
-    heap_chunk_t* first = (heap_chunk_t*)memory;
-    first->size = (size - sizeof(heap_chunk_t));
+    void* heap_memory = change_heap_memory(initial_size);
+    if(heap_memory == NULL)
+    {
+        return -1;
+    }
+
+    heap_chunk_t* first = (heap_chunk_t*)heap_memory;
+    first->size = (initial_size - sizeof(heap_chunk_t));
     CLEAR_FLAG(first->flags, CHUNK_USE_MASK);
 
 
     heap_state_t tmp = {
         .head = first,
-        .size = size,
+        .size = initial_size,
     };
 
     atomic_store(&heap->state, tmp);
-    heap->memory = memory;
+    heap->memory = heap_memory;
 
     return HEAP_INIT_SUCCESS;
 }
@@ -44,17 +51,25 @@ table_id_t salloc(heap_t* heap, uint16_t size)
     heap_state_t next;
 
     uint16_t required = sizeof(heap_chunk_t) + size;
+    uint16_t change = 0;
+
+    if (atomic_load(&heap->state).size < required)
+    {    
+        if(change_heap_memory(required + INC_BUFFER) == NULL)
+        {
+            return HEAP_ALLOC_TOO_SMALL;
+        }
+        printf("INC\n");
+        change = required + INC_BUFFER;
+    }
 
     do
     {
-        if (current.size < required)
-            return HEAP_ALLOC_NO_IDS;
-
         next = current;
 
         next.head = (void*)current.head + required;
 
-        next.size -= required;
+        next.size = (next.size - required) + change;
 
     } while (!atomic_compare_exchange_weak(
         &heap->state,

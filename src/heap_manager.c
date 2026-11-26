@@ -5,22 +5,16 @@
 
 #include <unistd.h>
 
-void* change_heap_memory(heap_t* heap, uint16_t size)
+void* change_heap_memory(uint16_t size)
 {
-    void* got = sbrk(size);
-    if (got == -1)
-    {
-        return -1;
-    }
-    
-    return got;
+    return sbrk(size);
 } 
 
 #endif
 
 #ifdef USE_EMBEDDED_SYS
 
-void* change_heap_memory(heap_t* heap, uint16_t size)
+void* change_heap_memory(uint16_t size)
 {
     return 0;
 }

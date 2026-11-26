@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include "master_table.h"
 
+#define INC_BUFFER 100
+
 #define HEAP_INIT_SUCCESS 0
 #define HEAP_INIT_INVALID_MEMORY -1
 #define HEAP_INIT_LOW_MEMORY -2
@@ -44,7 +46,7 @@ typedef struct
  *  Returns 0 on success or error code beginning in HEAP_INIT
  *
  * */
-int heap_init(heap_t* heap, void* memory, uint16_t size);
+int heap_init(heap_t* heap, uint16_t initial_size);
 
 table_id_t salloc(heap_t* heap, uint16_t size);
 
