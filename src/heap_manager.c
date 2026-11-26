@@ -5,7 +5,7 @@
 
 #include <unistd.h>
 
-void* change_heap_memory(uint16_t size)
+void* change_heap_memory(size_t size)
 {
     return sbrk(size);
 } 
@@ -14,7 +14,7 @@ void* change_heap_memory(uint16_t size)
 
 #ifdef USE_EMBEDDED_SYS
 
-void* change_heap_memory(uint16_t size)
+void* change_heap_memory(size_t size)
 {
     return 0;
 }

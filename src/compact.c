@@ -13,7 +13,7 @@ enum State
 
 int bubble_compact(heap_t* heap)
 {
-    uint16_t free_behind = 0;
+    size_t free_behind = 0;
     heap_chunk_t* current_chunk = heap->memory;
     heap_chunk_t* next_chunk;
 

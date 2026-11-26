@@ -1,4 +1,4 @@
 #pragma once
 #include <stdint.h>
 
-void* change_heap_memory(uint16_t size);
+void* change_heap_memory(size_t size);

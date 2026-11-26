@@ -16,7 +16,7 @@ void print_heap( __attribute__ ((unused)) heap_t* heap)
         if(pointer == atomic_load(&heap->state).head) // Unsafe mabye
         {
             
-            printf("CHUNK @ %p | Raw pointer @ %p \nID: %d | Size: %d | STATUS: %d \nEND OF HEAP | HEAP->Head @ %p\n" , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), -1,  atomic_load(&heap->state).size, pointer->flags, (void*)atomic_load(&heap->state).head );
+            printf("CHUNK @ %p | Raw pointer @ %p \nID: %d | Size: %d | STATUS: %d \nEND OF HEAP | HEAP->Head @ %p\n" , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), -1,  (int)atomic_load(&heap->state).size, pointer->flags, (void*)atomic_load(&heap->state).head );
             break;
         }
         

@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <threads.h>
+#include <sys/mman.h>
+#include <unistd.h>
 #include <stdio.h>
 #include "alloc.h"
 #include "assert.h"
@@ -9,19 +11,19 @@
 #include "heap_manager.h"
 
 
-int heap_init(heap_t* heap, uint16_t initial_size)
+int heap_init(heap_t* heap, size_t initial_size)
 {
     ASSERT_RET(initial_size > sizeof(heap_chunk_t) + 1, HEAP_INIT_LOW_MEMORY);
     ASSERT_RET(heap != NULL, HEAP_INIT_INVALID_HEAP);
 
-    void* heap_memory = change_heap_memory(initial_size);
+    void* heap_memory = mmap(NULL, initial_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if(heap_memory == NULL)
     {
         return -1;
     }
 
     heap_chunk_t* first = (heap_chunk_t*)heap_memory;
-    first->size = (initial_size - sizeof(heap_chunk_t));
+    first->size = (initial_size) - sizeof(heap_chunk_t);
     CLEAR_FLAG(first->flags, CHUNK_USE_MASK);
 
 
@@ -36,7 +38,7 @@ int heap_init(heap_t* heap, uint16_t initial_size)
     return HEAP_INIT_SUCCESS;
 }
 
-table_id_t salloc(heap_t* heap, uint16_t size)
+table_id_t salloc(heap_t* heap, size_t size)
 {
     ASSERT_RET(heap != NULL, HEAP_ALLOC_INVALID_HEAP);
     ASSERT_RET(size > 0, HEAP_ALLOC_TOO_SMALL);
@@ -50,26 +52,24 @@ table_id_t salloc(heap_t* heap, uint16_t size)
     heap_state_t current = atomic_load(&heap->state);
     heap_state_t next;
 
-    uint16_t required = sizeof(heap_chunk_t) + size;
-    uint16_t change = 0;
-
-    if (atomic_load(&heap->state).size < required)
-    {    
-        if(change_heap_memory(required + INC_BUFFER) == NULL)
-        {
-            return HEAP_ALLOC_TOO_SMALL;
-        }
-        printf("INC\n");
-        change = required + INC_BUFFER;
-    }
+    size_t required = sizeof(heap_chunk_t) + size;
 
     do
     {
+        
+        if(current.size < required)
+        {
+            //if(change_heap_memory(required + INC_BUFFER) == NULL)
+            //{
+                return HEAP_ALLOC_TOO_SMALL;
+            //}
+            //printf("INC\n");
+        }
         next = current;
 
         next.head = (void*)current.head + required;
 
-        next.size = (next.size - required) + change;
+        next.size = (next.size - required); //+ INC_BUFFER;
 
     } while (!atomic_compare_exchange_weak(
         &heap->state,
@@ -79,16 +79,16 @@ table_id_t salloc(heap_t* heap, uint16_t size)
 
     heap_chunk_t* chunk = current.head;
 
-    setup_chunk(chunk, size, id, CHUNK_USE_MASK);
+    setup_chunk((void*)chunk, size, id, CHUNK_USE_MASK);
 
     heap->master_table->entries[id].raw = (void*)chunk + sizeof(heap_chunk_t);
 
     return id;
 }
 
-void setup_chunk(heap_chunk_t* chunk, uint16_t size, table_id_t id, uint8_t flags)
+void setup_chunk(heap_chunk_t* chunk, size_t size, table_id_t id, uint8_t flags)
 {
-    chunk->flags = flags;
+    ATOMIC_SET_FLAG(&chunk->flags, flags);
     chunk->size = size;
     chunk->id = id;
     

@@ -18,7 +18,7 @@
 
 typedef struct
 {
-    uint16_t size;
+    size_t size;
     table_id_t id; 
     _Atomic uint8_t flags;
 } heap_chunk_t;
@@ -27,7 +27,7 @@ typedef struct
 typedef struct
 {
     heap_chunk_t* head;
-    uint16_t size;
+    size_t size;
 } heap_state_t;
 
 typedef struct
@@ -46,13 +46,13 @@ typedef struct
  *  Returns 0 on success or error code beginning in HEAP_INIT
  *
  * */
-int heap_init(heap_t* heap, uint16_t initial_size);
+int heap_init(heap_t* heap, size_t initial_size);
 
-table_id_t salloc(heap_t* heap, uint16_t size);
+table_id_t salloc(heap_t* heap, size_t size);
 
 int sfree(heap_t* heap, table_id_t id);
 
-void setup_chunk(heap_chunk_t* chunk, uint16_t size, table_id_t id, uint8_t flags);
+void setup_chunk(heap_chunk_t* chunk, size_t size, table_id_t id, uint8_t flags);
 
 void* dereference(heap_t* heap, table_id_t id);
 

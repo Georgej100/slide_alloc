@@ -88,7 +88,7 @@ int return_id(master_table_t* master_table, table_id_t id)
     void* new_head;
 
     do {
-        entry->next = old_head;
+        entry->next = UNTAG_PTR(old_head);
 
         new_head = PACK_FLAGS(entry, EXTRACT_FLAGS(old_head) + 1);
 

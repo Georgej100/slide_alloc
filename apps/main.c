@@ -14,12 +14,12 @@ void* worker(void* arg)
     
     for (int i = 0; i < 100; i++)
     {
-        ids[i] = salloc(&heap, 1);
+        ids[i] = salloc(&heap, 10);
         if(ids[i] < 0)
         {
-            printf("A\n");
+            //printf("A\n");
         }
-        //printf("%d\n", ids[i]);
+        printf("%d\n", ids[i]);
         //sfree(&heap, ids[i]);
     }
     printf("Done\n");
@@ -33,14 +33,14 @@ void* worker(void* arg)
 
 int main(void)
 {
-    heap_init(&heap, 1000);
+    heap_init(&heap, 100 * 4096);
 
-    table_entry_t* table_mem = malloc(10000 * sizeof(heap_chunk_t));
-    master_table_init(&master_table, table_mem, 10000);
+    table_entry_t* table_mem = malloc(15000 * sizeof(table_entry_t));
+    master_table_init(&master_table, table_mem, 15000);
 
     heap.master_table = &master_table;
 
-    pthread_t thread[10];
+    pthread_t thread[100];
 
     for (int i = 0; i < 10; i++)
     {
