@@ -55,7 +55,7 @@ int get_next_id(master_table_t* master_table, table_id_t* id) {
         
     } while (1);
 
-    new_node->next = NULL;
+    
     *id = ENTRY_ID_FROM_ADDR(master_table->entries, new_node);
 
     controls_t controls = {

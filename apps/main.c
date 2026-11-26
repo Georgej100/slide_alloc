@@ -10,17 +10,18 @@ master_table_t master_table;
 
 void* worker(void* arg)
 {
-    table_id_t ids[10];
+    table_id_t ids[1000];
     
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 1000; i++)
     {
-        ids[i] = salloc(&heap, (rand() % (100 - 3 + 1) + 3));
+        ids[i] = salloc(&heap, 1);
+        //sfree(&heap, ids[i]);
     }
     
     
     for (int i = 0; i < 10; i++)
     {
-        sfree(&heap, ids[i]);
+        
     }
     
     arg = arg;
@@ -32,7 +33,7 @@ void* worker(void* arg)
 
 int main(void)
 {
-    void* heap_memory = mmap(NULL, sysconf(_SC_PAGESIZE) * 4, (PROT_READ | PROT_WRITE),
+    void* heap_memory = mmap(NULL, sysconf(_SC_PAGESIZE) * 9000, (PROT_READ | PROT_WRITE),
         (MAP_PRIVATE | MAP_ANONYMOUS), -1, 0);
     
     if(heap_memory == MAP_FAILED)
@@ -40,21 +41,18 @@ int main(void)
         exit(EXIT_FAILURE);
     }
     
-    heap_init(&heap, heap_memory, sysconf(_SC_PAGESIZE) * 4);
+    heap_init(&heap, heap_memory, sysconf(_SC_PAGESIZE) * 9000);
 
-    void* table_memory = mmap(NULL, sizeof(table_entry_t) * 400, (PROT_READ | PROT_WRITE),
+    void* table_memory = mmap(NULL, sizeof(table_entry_t) * 20000, (PROT_READ | PROT_WRITE),
         (MAP_PRIVATE | MAP_ANONYMOUS), -1, 0);
     
     if (table_memory == MAP_FAILED)
     {
         exit(EXIT_FAILURE);
-    }
-
-    
-    master_table_init(&master_table, table_memory, 400);
+    }    
+    master_table_init(&master_table, table_memory, 20000);
 
     heap.master_table = &master_table;
-
 
     pthread_t thread[10];
 

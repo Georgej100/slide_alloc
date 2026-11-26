@@ -31,6 +31,7 @@ typedef struct
 typedef struct
 {
     void* memory;
+    void* memory_request_callback;
     master_table_t* master_table;
     _Atomic heap_state_t state;
 } heap_t;

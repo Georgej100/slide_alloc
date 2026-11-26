@@ -21,11 +21,11 @@ typedef struct
 typedef struct table_entry_t table_entry_t;
 struct table_entry_t 
 {
-    union 
-    {
+    //union 
+    //{
         void* raw;
         table_entry_t* next;
-    };
+    //};
 
     _Atomic controls_t controls;
 };

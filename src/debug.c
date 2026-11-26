@@ -9,7 +9,7 @@ void print_heap( __attribute__ ((unused)) heap_t* heap)
 {    
 #ifdef DEBUG
     heap_chunk_t* pointer = (void*)heap->memory;
-    int n = 101;
+    int n = 1; // Manual stop, compile with 1 to override
 
     while(n != 0)
     {
@@ -23,7 +23,6 @@ void print_heap( __attribute__ ((unused)) heap_t* heap)
         printf("CHUNK @ %p | Raw pointer @ %p \nID: %d | Size: %d | STATUS: %d " , (void*)pointer, (void*)pointer + sizeof(heap_chunk_t), pointer->id,  (int)pointer->size,  pointer->flags);
         pointer = (void*)pointer + sizeof(heap_chunk_t) + pointer->size;
         printf("Next Chunk @ %p\n", (void*)pointer);
-        n--;
     }
 
 #endif
